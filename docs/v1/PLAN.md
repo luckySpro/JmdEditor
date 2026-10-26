@@ -24,7 +24,7 @@ crates/jmd-core   Markdown → document model (comrak), outline, front matter
 crates/jmd-import URL normalisation, fetch, HTML → Markdown, image download
 crates/jmd-export DOCX (docx-rs), PDF (Typst), HTML renderers over the model
 crates/jmd-server Axum export / fetch API for the mini-program
-apps/miniprogram  uni-app (WeChat first) reader + import + export
+apps/miniprogram  native WeChat mini-program: reader + import + export (D7)
 ```
 
 All exporters read the same `jmd_core::Document`, so preview, Word and PDF keep the same order, numbering and TOC.
@@ -39,11 +39,11 @@ All exporters read the same `jmd_core::Document`, so preview, Word and PDF keep 
 | 3 Export | `jmd-export` writes DOCX, PDF and HTML; tests check the files' structure |
 | 4 App | Tauri app builds; UI matches the approved mockup; open / save / import / export work through IPC |
 | 5 Server | `jmd-server` serves `/api/import` and `/api/export` with limits; tests via `tower::ServiceExt` |
-| 6 Mini-program | uni-app WeChat build: read, import, export, send to chat |
+| 6 Mini-program | WeChat mini-program (native, D7): read, import, export, send to chat |
 | 7 Delivery | CI for crates, frontend and Tauri builds; screenshots; README |
 
 ## Risks
 
 - Mini-program editing is reader-only in v1; WeChat cannot host Milkdown.
-- Bundled CJK fonts add size; v1 bundles Noto Sans SC subset-free fonts only when the build script finds them, otherwise uses system fonts (see DECISIONS).
+- Bundled CJK fonts add about 50 MB; release builds run `scripts/fetch-fonts.sh`, development builds use system fonts (D8).
 - iOS / Android release signing and Apple notarisation are not configured; CI produces unsigned artifacts.

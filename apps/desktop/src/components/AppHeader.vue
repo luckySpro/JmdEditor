@@ -11,7 +11,10 @@ const menuOpen = ref(false)
 const modes: EditorMode[] = platform.mobile ? ['rich', 'source', 'read'] : ['rich', 'split', 'source', 'read']
 
 const subtitle = computed(() => {
-  const where = state.doc.dir ?? (platform.kind === 'web' ? t('app.inBrowser') : '')
+  const dir = state.doc.dir
+  const parts = dir ? dir.split(/[\\/]/).filter(Boolean) : []
+  const short = parts.length > 2 ? `…/${parts.slice(-2).join('/')}` : dir
+  const where = short ?? (platform.kind === 'web' ? t('app.inBrowser') : '')
   const status = state.saving ? t('app.saving') : dirty.value ? (state.doc.path ? t('app.unsaved') : t('app.notSaved')) : t('app.saved')
   return [where, status].filter(Boolean).join(' · ')
 })

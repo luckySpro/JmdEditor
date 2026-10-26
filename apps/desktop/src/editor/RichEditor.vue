@@ -4,7 +4,7 @@
 import { Crepe } from '@milkdown/crepe'
 import '@milkdown/crepe/theme/common/style.css'
 import '@milkdown/crepe/theme/classic.css'
-import { editorViewCtx } from '@milkdown/kit/core'
+import { editorViewCtx, remarkStringifyOptionsCtx } from '@milkdown/kit/core'
 import {
   createCodeBlockCommand,
   insertHrCommand,
@@ -24,6 +24,7 @@ import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { t } from '../i18n'
 import { snippet, type FormatCommand } from '../lib/format'
 import { joinFrontMatter, splitFrontMatter } from '../lib/frontmatter'
+import { fromRichImages, toRichImages } from '../lib/imageblocks'
 import { platform } from '../platform'
 import { reportError, state, type EditorHandle } from '../store'
 
@@ -103,7 +104,7 @@ async function create() {
   frontMatter = split.frontMatter
   crepe = new Crepe({
     root: host.value!,
-    defaultValue: split.body,
+    defaultValue: toRichImages(split.body),
     featureConfigs: {
       [Crepe.Feature.ImageBlock]: {
         proxyDomURL: (url: string) => platform.imageUrl(url, props.baseDir),
@@ -115,11 +116,15 @@ async function create() {
       [Crepe.Feature.LinkTooltip]: {},
     },
   })
+  // Keep the note's own list style instead of remark's `*` bullets.
+  crepe.editor.config((ctx) => {
+    ctx.update(remarkStringifyOptionsCtx, (prev) => ({ ...prev, bullet: '-' as const, rule: '-' as const }))
+  })
   crepe.on((api) => {
     api.markdownUpdated((_ctx, markdown) => {
       if (props.readonly || markdown === baseline) return
       baseline = ''
-      emit('update:modelValue', joinFrontMatter(frontMatter, markdown))
+      emit('update:modelValue', joinFrontMatter(frontMatter, fromRichImages(markdown)))
     })
   })
   await crepe.create()
@@ -142,7 +147,7 @@ watch(
     pending = setTimeout(() => {
       const split = splitFrontMatter(value)
       frontMatter = split.frontMatter
-      act(replaceAll(split.body, true))
+      act(replaceAll(toRichImages(split.body), true))
     }, 180)
   },
 )

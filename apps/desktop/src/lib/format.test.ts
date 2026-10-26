@@ -55,3 +55,16 @@ describe('front matter', () => {
     expect(splitFrontMatter('# none').frontMatter).toBe('')
   })
 })
+
+import { fromRichImages, toRichImages } from './imageblocks'
+describe('image blocks', () => {
+  it('keeps alt text through the rich editor', () => {
+    const md = '# T\n\n![Sync volume](assets/chart.png)\n\nText ![inline](a.png) here.\n\n```\n![code](x.png)\n```\n'
+    const rich = toRichImages(md)
+    expect(rich).toContain('![1.00](assets/chart.png "Sync volume")')
+    expect(rich).toContain('![code](x.png)')
+    // What Milkdown writes back after a resize.
+    expect(fromRichImages(rich.replace('![1.00]', '![0.75]'))).toBe(md)
+    expect(fromRichImages('![1.00](a.png)')).toBe('![](a.png)')
+  })
+})

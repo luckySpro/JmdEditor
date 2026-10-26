@@ -5,6 +5,9 @@
   "scripts": {
     "dev": "pnpm --filter jmdeditor-desktop dev",
     "build": "pnpm --filter jmdeditor-desktop build",
-    "tauri": "pnpm --filter jmdeditor-desktop tauri"
+    "tauri": "pnpm --filter jmdeditor-desktop tauri",
+    "test": "pnpm -r test",
+    "server": "cargo run -p jmd-server",
+    "fonts": "scripts/fetch-fonts.sh"
   }
 }
