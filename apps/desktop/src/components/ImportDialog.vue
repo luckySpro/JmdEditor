@@ -2,13 +2,29 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 
 import RichEditor from '../editor/RichEditor.vue'
-import { errorText, formatBytes, t } from '../i18n'
+import { errorText, formatBytes, t, type Key } from '../i18n'
 import { analyze } from '../lib/analyze'
 import { platform } from '../platform'
 import { applyImport, closeDialog, state, toast, updateSettings } from '../store'
 import type { ImportResult, Resolved } from '../types'
 import BaseDialog from './BaseDialog.vue'
 import Icon from './Icon.vue'
+
+/** The resolver's notes are English; show them in the interface language. */
+const NOTE_KEYS: Record<string, Key> = {
+  'Will fetch the raw file from raw.githubusercontent.com': 'import.note.githubRaw',
+  'Will fetch the repository README': 'import.note.readme',
+  'Raw GitHub file': 'import.note.rawGitHub',
+  "Will fetch the gist's first file": 'import.note.gistFirst',
+  'Raw gist file': 'import.note.rawGist',
+  'Will fetch the raw file from Gitee': 'import.note.giteeRaw',
+  'Raw Gitee file': 'import.note.rawGitee',
+  'Will fetch the raw file from GitLab': 'import.note.gitlabRaw',
+  'Raw GitLab file': 'import.note.rawGitLab',
+  'Markdown file': 'import.note.markdown',
+  'The main article will be converted to Markdown': 'import.note.article',
+}
+const noteText = (note: string) => (NOTE_KEYS[note] ? t(NOTE_KEYS[note]) : note)
 
 const url = ref(state.importPrefill)
 state.importPrefill = ''
@@ -122,7 +138,7 @@ async function paste() {
           </div>
           <div v-if="resolved" class="detected">
             <span class="pill"><Icon name="check" :size="13" />{{ t('import.detected', { kind: t(`import.kind.${resolved.kind}`) }) }}</span>
-            <span class="hint">{{ resolved.note }}</span>
+            <span class="hint">{{ noteText(resolved.note) }}</span>
           </div>
           <p v-else-if="resolveError" class="err">{{ resolveError }}</p>
         </div>
