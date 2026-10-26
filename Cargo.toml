@@ -4,6 +4,7 @@ members = [
   "crates/jmd-core",
   "crates/jmd-import",
   "crates/jmd-export",
+  "apps/desktop/src-tauri",
 ]
 
 [workspace.package]

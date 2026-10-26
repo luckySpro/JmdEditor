@@ -1,0 +1,57 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "JmdEditor",
+  "version": "0.1.0",
+  "identifier": "com.mjgroup.jmdeditor",
+  "build": {
+    "beforeDevCommand": "pnpm dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "pnpm build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "JmdEditor",
+        "width": 1280,
+        "height": 820,
+        "minWidth": 720,
+        "minHeight": 520
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; img-src 'self' asset: http://asset.localhost https: data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; script-src 'self' 'wasm-unsafe-eval'; connect-src 'self' ipc: http://ipc.localhost",
+      "assetProtocol": {
+        "enable": true,
+        "scope": ["$HOME/**", "$DOCUMENT/**", "$DESKTOP/**", "$DOWNLOAD/**", "$APPDATA/**"]
+      }
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "publisher": "M&J Group",
+    "copyright": "© 2026 M&J Group",
+    "category": "Productivity",
+    "shortDescription": "Markdown editor with URL import and Word/PDF export",
+    "longDescription": "JmdEditor opens and edits Markdown offline, imports notes from GitHub, Gitee, gists and web pages, and exports Word and PDF files with a real table of contents.",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "resources": {
+      "resources/fonts/": "fonts/"
+    },
+    "fileAssociations": [
+      {
+        "ext": ["md", "markdown"],
+        "name": "Markdown document",
+        "role": "Editor",
+        "mimeType": "text/markdown"
+      }
+    ]
+  }
+}

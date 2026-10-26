@@ -1,0 +1,10 @@
+{
+  "name": "jmdeditor-workspace",
+  "private": true,
+  "packageManager": "pnpm@10.28.0",
+  "scripts": {
+    "dev": "pnpm --filter jmdeditor-desktop dev",
+    "build": "pnpm --filter jmdeditor-desktop build",
+    "tauri": "pnpm --filter jmdeditor-desktop tauri"
+  }
+}

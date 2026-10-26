@@ -1,0 +1,40 @@
+{
+  "name": "jmdeditor-desktop",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "screenshots": "node scripts/screenshots.mjs",
+    "tauri": "tauri"
+  },
+  "dependencies": {
+    "@codemirror/commands": "^6.8.1",
+    "@codemirror/lang-markdown": "^6.5.2",
+    "@codemirror/language": "^6.11.0",
+    "@codemirror/language-data": "^6.5.2",
+    "@codemirror/state": "^6.5.2",
+    "@codemirror/view": "^6.38.0",
+    "@fontsource-variable/source-serif-4": "^5.3.1",
+    "@fontsource/inter": "^5.3.0",
+    "@fontsource/jetbrains-mono": "^5.3.0",
+    "@lezer/highlight": "^1.2.5",
+    "@milkdown/crepe": "7.22.3",
+    "@milkdown/kit": "7.22.3",
+    "@tauri-apps/api": "^2.12.4",
+    "@tauri-apps/plugin-dialog": "^2.8.3",
+    "@tauri-apps/plugin-opener": "^2.7.2",
+    "vue": "^3.5.44"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.12.4",
+    "@vitejs/plugin-vue": "^6.0.10",
+    "typescript": "~5.9.3",
+    "vite": "^8.3.5",
+    "vitest": "^5.0.5",
+    "vue-tsc": "^3.3.13"
+  }
+}
