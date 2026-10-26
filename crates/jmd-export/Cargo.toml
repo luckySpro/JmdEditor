@@ -1,0 +1,22 @@
+[package]
+name = "jmd-export"
+description = "Word, PDF and HTML export for JmdEditor"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+jmd-core.workspace = true
+serde.workspace = true
+thiserror.workspace = true
+docx-rs = "0.4"
+typst = "0.15"
+typst-pdf = "0.15"
+typst-layout = "0.15"
+typst-kit = { version = "0.15", default-features = false, features = ["scan-fonts", "embedded-fonts"] }
+base64 = "0.22"
+image = { version = "0.25", default-features = false, features = ["png", "jpeg", "gif", "webp", "bmp"] }
+
+[dev-dependencies]
+zip = { version = "2", default-features = false, features = ["deflate"] }

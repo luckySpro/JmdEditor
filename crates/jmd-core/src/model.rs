@@ -104,6 +104,8 @@ pub enum Inline {
     },
     Math {
         tex: String,
+        /// True for `$$ … $$`.
+        display: bool,
     },
     FootnoteRef {
         name: String,
@@ -134,7 +136,7 @@ fn push_plain(inlines: &[Inline], out: &mut String) {
         match inline {
             Inline::Text { text } => out.push_str(text),
             Inline::Code { code } => out.push_str(code),
-            Inline::Math { tex } => out.push_str(tex),
+            Inline::Math { tex, .. } => out.push_str(tex),
             Inline::Strong { content }
             | Inline::Emph { content }
             | Inline::Strike { content }

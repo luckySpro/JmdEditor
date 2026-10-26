@@ -80,8 +80,7 @@ pub fn suggested_file_name(title: &str, resolved: &Resolved) -> String {
             .ok()
             .and_then(|u| {
                 u.path_segments()?
-                    .filter(|s| !s.is_empty())
-                    .next_back()
+                    .rfind(|s| !s.is_empty())
                     .map(str::to_string)
             })
             .map(|s| {

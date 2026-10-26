@@ -3,6 +3,7 @@ resolver = "2"
 members = [
   "crates/jmd-core",
   "crates/jmd-import",
+  "crates/jmd-export",
 ]
 
 [workspace.package]

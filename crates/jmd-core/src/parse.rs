@@ -211,7 +211,10 @@ fn inlines<'a>(node: &'a AstNode<'a>) -> Vec<Inline> {
                 title: l.title,
                 alt: plain_text(&inlines(child)),
             },
-            NodeValue::Math(m) => Inline::Math { tex: m.literal },
+            NodeValue::Math(m) => Inline::Math {
+                tex: m.literal,
+                display: m.display_math,
+            },
             NodeValue::FootnoteReference(f) => Inline::FootnoteRef {
                 name: f.name,
                 number: f.ix,
