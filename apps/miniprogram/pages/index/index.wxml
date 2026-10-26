@@ -41,4 +41,8 @@
       <button class="btn primary grow" bindtap="sendResult">{{t.sendToChat}}</button>
     </view>
   </view>
+
+  <view class="about-link" bindtap="goAbout">
+    <text>{{t.aboutLink}}</text><text class="chevron">›</text>
+  </view>
 </view>

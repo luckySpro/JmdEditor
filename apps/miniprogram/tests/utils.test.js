@@ -34,3 +34,12 @@ test('maps WeChat languages and has every text in every language', () => {
   assert.strictEqual(i18n.format('{name} ok', { name: 'a.pdf' }), 'a.pdf ok')
 })
 
+
+test('desktop download links point at the release assets', () => {
+  const desktop = require('../utils/desktop')
+  const links = desktop.downloads('1.2.3', 'https://github.com/o/r/releases')
+  assert.deepStrictEqual(links.map((l) => l.id), ['windows', 'macos', 'linux'])
+  assert.strictEqual(links[0].url, 'https://github.com/o/r/releases/download/v1.2.3/JmdEditor_1.2.3_x64-setup.exe')
+  assert.ok(links.every((l) => l.url.includes('/v1.2.3/') && l.url.includes('_1.2.3_')))
+  assert.strictEqual(desktop.downloads()[1].url.endsWith('_universal.dmg'), true)
+})

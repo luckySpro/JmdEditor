@@ -46,6 +46,10 @@ Page({
     }
   },
 
+  goAbout() {
+    wx.navigateTo({ url: '/pages/about/about' })
+  },
+
   onUrlInput(e) {
     this.setData({ url: e.detail.value })
   },

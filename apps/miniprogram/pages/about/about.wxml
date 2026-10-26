@@ -1,0 +1,37 @@
+<view class="page">
+  <view class="card hero">
+    <view class="logo">J</view>
+    <text class="name">JmdEditor</text>
+    <text class="tagline">{{t.tagline}}</text>
+    <text class="muted small">{{versionLabel}} · {{author}}</text>
+  </view>
+
+  <view class="card">
+    <text class="body">{{t.intro}}</text>
+    <view class="features">
+      <view wx:for="{{t.features}}" wx:key="*this" class="feature">
+        <text class="dot">•</text><text class="body">{{item}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="card">
+    <text class="label">{{t.desktopTitle}}</text>
+    <text class="muted small hint">{{t.desktopHint}}</text>
+    <view wx:for="{{downloads}}" wx:key="id" class="download">
+      <view class="download-text">
+        <text class="platform">{{item.name}}</text>
+        <text class="muted small">{{item.detail}}</text>
+      </view>
+      <button class="btn outline small" data-url="{{item.url}}" bindtap="copyLink">{{t.copy}}</button>
+    </view>
+    <view class="download">
+      <view class="download-text">
+        <text class="platform">{{t.allVersions}}</text>
+        <text class="muted small link">{{releasesUrl}}</text>
+      </view>
+      <button class="btn outline small" data-url="{{releasesUrl}}" bindtap="copyLink">{{t.copy}}</button>
+    </view>
+    <text class="muted small note">{{t.macNote}}</text>
+  </view>
+</view>

@@ -12,7 +12,7 @@ An offline Markdown editor by **M&J Group** for Windows, macOS, Linux, iOS and A
 - **Works offline** on desktop and mobile. Fonts ship with the app.
 - **Four languages**: English, 简体中文, 繁體中文 and 日本語, plus light and dark themes and an accent colour.
 - **Browser build and hosted API**: the same UI runs in a browser against `jmd-server`, which also serves the mini-program.
-- **WeChat mini-program**: open a note from a link or a chat file, read it, export PDF or Word, then open it or send it to a chat.
+- **WeChat mini-program**: open a note from a link or a chat file, read it, export PDF or Word, then open it or send it to a chat. An About page introduces the app and copies desktop download links.
 
 | Export dialog | Import from URL |
 | --- | --- |
@@ -61,7 +61,7 @@ pnpm tauri android init && pnpm tauri android dev
 pnpm tauri ios init && pnpm tauri ios dev
 ```
 
-Pushing a tag such as `v0.1.0` runs `.github/workflows/release.yml`, which builds macOS, Windows and Linux installers into a draft release. Code signing and notarisation are not configured yet.
+Pushing a tag such as `v0.1.0` runs `.github/workflows/release.yml`, which builds macOS, Windows and Linux installers and publishes the release once all three have built. Code signing and notarisation are not configured yet. After a release, set `DESKTOP_VERSION` in `apps/miniprogram/config.js` so the mini-program's download links match.
 
 ## Export API (`jmd-server`)
 
@@ -100,7 +100,7 @@ JmdEditor 是 M&J Group 出品的离线 Markdown 编辑器，支持 Windows、ma
 - 从 GitHub、Gitee、GitLab、Gist、原始 .md 链接或网页文章导入笔记，可将图片保存到本地；
 - 导出 Word、PDF、HTML，支持目录、标题编号、页码、封面、书签、PDF/A，以及中文和日文；
 - 界面支持简体中文、繁體中文、English、日本語，浅色和深色主题；
-- 微信小程序：从链接或聊天文件打开笔记，导出 PDF 或 Word 后可直接打开或发送给朋友。
+- 微信小程序：从链接或聊天文件打开笔记，导出 PDF 或 Word 后可直接打开或发送给朋友；“关于”页面介绍应用，并可复制电脑版下载链接。
 
 ## License
 
