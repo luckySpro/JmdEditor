@@ -1,0 +1,16 @@
+{
+  "description": "JmdEditor reader for WeChat: open Markdown from a link or a chat file, export Word and PDF",
+  "packOptions": { "ignore": [{ "type": "folder", "value": "tests" }, { "type": "file", "value": "README.md" }] },
+  "setting": {
+    "urlCheck": true,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true
+  },
+  "compileType": "miniprogram",
+  "libVersion": "3.6.0",
+  "appid": "touristappid",
+  "projectname": "JmdEditor",
+  "condition": {}
+}

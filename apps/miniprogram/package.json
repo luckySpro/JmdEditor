@@ -1,0 +1,9 @@
+{
+  "name": "jmd-miniprogram",
+  "private": true,
+  "version": "0.1.0",
+  "description": "JmdEditor reader for WeChat (native mini-program, no build step)",
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  }
+}

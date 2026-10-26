@@ -24,6 +24,8 @@ use tokio::sync::Semaphore;
 use tower_http::cors::{AllowOrigin, CorsLayer};
 use tower_http::services::{ServeDir, ServeFile};
 
+pub mod mini;
+
 /// Markdown sent for export or rendering may not exceed this.
 pub const MAX_MARKDOWN_BYTES: usize = 5 * 1024 * 1024;
 
@@ -358,6 +360,9 @@ struct ExportRequest {
     options: ExportOptions,
     /// Download name; derived from the title when missing.
     file_name: Option<String>,
+    /// Render: return a body fragment with inline styles for the mini-program.
+    #[serde(default)]
+    mini: bool,
 }
 
 fn check_size(markdown: &str) -> Result<(), ApiError> {
@@ -376,7 +381,12 @@ async fn render(Json(req): Json<ExportRequest>) -> Result<Response, ApiError> {
     // Web images keep their links here; the viewer's browser loads them.
     let html = tokio::task::spawn_blocking(move || {
         let doc = jmd_core::parse(&req.markdown);
-        jmd_export::html::render(&doc, &req.options, &ImageSource::default())
+        let html = jmd_export::html::render(&doc, &req.options, &ImageSource::default());
+        if req.mini {
+            mini::inline_styles(&html)
+        } else {
+            html
+        }
     })
     .await
     .map_err(|e| ApiError::new(StatusCode::INTERNAL_SERVER_ERROR, "export", e.to_string()))?;
