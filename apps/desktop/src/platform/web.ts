@@ -87,6 +87,7 @@ export function createWebPlatform(): Platform {
       platform: 'web',
     }),
     initialFile: async () => null,
+    onOpenFile: async () => () => {},
     async pickFile() {
       const file = await pickLocalFile()
       if (!file) return null

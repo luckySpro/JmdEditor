@@ -10,6 +10,7 @@ An offline Markdown editor by **M&J Group** for Windows, macOS, Linux, iOS and A
 - **Import from URL**: GitHub, Gitee and GitLab file links, gists, raw `.md` links and web articles become a new note. Images can be saved next to the note, and the source link and date go into the front matter. Links are fetched by the Rust side with private-network, size, time and redirect limits.
 - **Export to Word, PDF and HTML**: four templates (Clean, Academic, Business, GitHub), A4 or Letter, a table of contents, numbered headings, page numbers, an optional cover page, PDF bookmarks, PDF/A, and Chinese and Japanese text. Word files use real Heading styles and an updatable TOC field. Math, tables, code, task lists, footnotes, GitHub alerts and images are supported.
 - **Works offline** on desktop and mobile. Fonts ship with the app.
+- **Opens .md files from the system**: installers register `.md` and `.markdown`. Double-clicking a file opens it, also on macOS, and a second file opens in the window that is already running. Settings explain how to make JmdEditor the default app, which each system leaves to the user.
 - **Updates**: the desktop app checks a signed release policy, offers new versions, and can require an update before it keeps working. It saves your note, installs and restarts.
 - **Four languages**: English, 简体中文, 繁體中文 and 日本語, plus light and dark themes and an accent colour.
 - **Browser build and hosted API**: the same UI runs in a browser against `jmd-server`, which also serves the mini-program.

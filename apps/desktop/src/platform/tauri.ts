@@ -1,4 +1,5 @@
 import { Channel, convertFileSrc, invoke } from '@tauri-apps/api/core'
+import { listen } from '@tauri-apps/api/event'
 import { ask, open, save } from '@tauri-apps/plugin-dialog'
 import { openPath, openUrl, revealItemInDir } from '@tauri-apps/plugin-opener'
 
@@ -21,6 +22,7 @@ export function createTauriPlatform(): Platform {
     folders: !mobile,
     appInfo: () => invoke<AppInfo>('app_info'),
     initialFile: () => invoke<string | null>('initial_file'),
+    onOpenFile: (handler) => listen<string>('open-file', (event) => handler(event.payload)),
     async pickFile() {
       const path = await open({ multiple: false, directory: false, filters: MARKDOWN })
       return typeof path === 'string' ? invoke<OpenedFile>('open_file', { path }) : null

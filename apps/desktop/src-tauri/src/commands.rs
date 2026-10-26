@@ -20,7 +20,6 @@ use crate::update::{self, UpdateStatus};
 pub struct AppState {
     pub engine: Arc<OnceLock<PdfEngine>>,
     pub font_dirs: OnceLock<Vec<PathBuf>>,
-    pub initial_file: OnceLock<Option<String>>,
 }
 
 impl AppState {
@@ -69,8 +68,8 @@ pub fn app_info(app: AppHandle) -> serde_json::Value {
 }
 
 #[tauri::command]
-pub fn initial_file(state: State<'_, AppState>) -> Option<String> {
-    state.initial_file.get().cloned().flatten()
+pub fn initial_file(pending: State<'_, crate::open::PendingOpen>) -> Option<String> {
+    pending.take()
 }
 
 #[tauri::command]

@@ -84,6 +84,12 @@ onMounted(async () => {
   window.addEventListener('dragover', (e) => e.preventDefault())
   window.addEventListener('drop', onDrop)
   window.addEventListener('beforeunload', onBeforeUnload)
+  // Listen before init() asks for the start-up file, so none is missed.
+  unlisten.push(
+    await platform.onOpenFile((path) => {
+      if (!updateRequired.value) void openPath(path)
+    }),
+  )
   await init()
   if (platform.kind === 'tauri') {
     const { getCurrentWindow } = await import('@tauri-apps/api/window')

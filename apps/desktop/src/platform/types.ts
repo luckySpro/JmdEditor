@@ -69,6 +69,8 @@ export interface Platform {
   folders: boolean
   appInfo(): Promise<AppInfo>
   initialFile(): Promise<string | null>
+  /** Files the system hands over later (double-click, "Open with"). Returns a stop function. */
+  onOpenFile(handler: (path: string) => void): Promise<() => void>
   pickFile(): Promise<OpenedFile | null>
   pickFolder(): Promise<string | null>
   openFile(path: string): Promise<OpenedFile>

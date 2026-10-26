@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 import { LANGUAGES, t } from '../i18n'
 import { platform } from '../platform'
@@ -10,6 +10,11 @@ import BaseDialog from './BaseDialog.vue'
 const ACCENTS = ['#2F5BD3', '#0F766E', '#7C3AED', '#B45309', '#BE123C']
 const MODES: EditorMode[] = ['rich', 'split', 'source', 'read']
 const fonts = ref<string[] | null>(null)
+/** Apps cannot make themselves the default, so the settings say how. */
+const defaultAppHint = computed(() => {
+  const os = state.info?.platform
+  return os === 'windows' || os === 'macos' || os === 'linux' ? t(`settings.defaultApp.${os}`) : null
+})
 
 onMounted(async () => {
   if (platform.kind === 'tauri') fonts.value = await platform.fontFamilies().catch(() => [])
@@ -109,6 +114,10 @@ async function reset() {
           <span>{{ t('settings.importSource') }}</span>
           <input type="checkbox" :checked="state.settings.importRecordSource" @change="set('importRecordSource', ($event.target as HTMLInputElement).checked)" />
         </label>
+        <template v-if="platform.kind === 'tauri' && defaultAppHint">
+          <div class="row"><span>{{ t('settings.defaultApp') }}</span></div>
+          <p class="hint">{{ defaultAppHint }}</p>
+        </template>
         <details v-if="platform.kind === 'tauri'">
           <summary>{{ t('settings.fonts') }} ({{ fonts?.length ?? '…' }})</summary>
           <p class="hint fonts">{{ fonts?.length ? fonts.join(' · ') : t('settings.fontsNone') }}</p>
