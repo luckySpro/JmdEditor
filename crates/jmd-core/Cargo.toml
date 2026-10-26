@@ -1,0 +1,11 @@
+[package]
+name = "jmd-core"
+description = "Markdown parsing and the shared document model for JmdEditor"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+comrak = { version = "0.59", default-features = false }
+serde.workspace = true
