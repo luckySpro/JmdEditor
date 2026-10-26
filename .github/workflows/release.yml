@@ -39,8 +39,10 @@ jobs:
         include:
           - platform: macos-latest
             args: --target universal-apple-darwin
+          # NSIS only: WiX (MSI) rejects the "&" in "M&J Group", and the
+          # download links and updater use the NSIS installer.
           - platform: windows-latest
-            args: ""
+            args: --bundles nsis
           - platform: ubuntu-22.04
             args: ""
     runs-on: ${{ matrix.platform }}
