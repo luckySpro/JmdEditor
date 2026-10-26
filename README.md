@@ -61,7 +61,7 @@ pnpm tauri android init && pnpm tauri android dev
 pnpm tauri ios init && pnpm tauri ios dev
 ```
 
-Pushing a tag such as `v0.1.0` runs `.github/workflows/release.yml`, which builds macOS, Windows and Linux installers and publishes the release once all three have built. Code signing and notarisation are not configured yet. After a release, set `DESKTOP_VERSION` in `apps/miniprogram/config.js` so the mini-program's download links match.
+Pushing a tag such as `v0.1.0`, or running the Release workflow from the Actions tab with a tag name, runs `.github/workflows/release.yml`, which builds macOS, Windows and Linux installers and publishes the release once all three have built. Code signing and notarisation are not configured yet. After a release, set `DESKTOP_VERSION` in `apps/miniprogram/config.js` so the mini-program's download links match.
 
 ## Export API (`jmd-server`)
 
