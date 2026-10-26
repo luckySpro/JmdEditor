@@ -10,12 +10,13 @@ import SettingsDialog from './components/SettingsDialog.vue'
 import Sidebar from './components/Sidebar.vue'
 import StatusBar from './components/StatusBar.vue'
 import Toasts from './components/Toasts.vue'
+import UpdateDialog from './components/UpdateDialog.vue'
 import ReadView from './editor/ReadView.vue'
 import RichEditor from './editor/RichEditor.vue'
 import SourceEditor from './editor/SourceEditor.vue'
 import { t } from './i18n'
 import { platform } from './platform'
-import { dirty, docName, init, newNote, openPath, openPicker, save, setContent, state } from './store'
+import { dirty, docName, init, newNote, openPath, openPicker, save, setContent, state, updateRequired } from './store'
 import type { Format } from './types'
 
 const exportFormat = ref<Format | null>(null)
@@ -23,7 +24,7 @@ const showSidebar = computed(() => platform.folders && state.sidebarOpen)
 
 function onKey(e: KeyboardEvent) {
   const mod = e.ctrlKey || e.metaKey
-  if (!mod || state.dialog) return
+  if (!mod || state.dialog || state.update.open) return
   const key = e.key.toLowerCase()
   const actions: Record<string, () => void> = {
     s: () => void save(e.shiftKey),
@@ -47,7 +48,7 @@ function onKey(e: KeyboardEvent) {
 /** A link dropped on the window opens the import dialog; a Markdown file opens. */
 function onDrop(e: DragEvent) {
   const dt = e.dataTransfer
-  if (!dt) return
+  if (!dt || updateRequired.value) return
   const files = [...dt.files]
   if (files.some((f) => f.type.startsWith('image/'))) return // editors store images themselves
   const uri = dt.getData('text/uri-list') || dt.getData('text/plain')
@@ -99,7 +100,7 @@ onMounted(async () => {
         if (!ok) event.preventDefault()
       }),
       await getCurrentWebview().onDragDropEvent((event) => {
-        if (event.payload.type !== 'drop') return
+        if (event.payload.type !== 'drop' || updateRequired.value) return
         const md = event.payload.paths.find((p) => /\.(md|markdown|mdown|mkd|txt)$/i.test(p))
         if (md) void openPath(md)
       }),
@@ -177,6 +178,7 @@ watch(
     <ExportDialog v-else-if="state.dialog === 'export'" :format="exportFormat" />
     <SettingsDialog v-else-if="state.dialog === 'settings'" />
     <MobileSheet v-else-if="state.dialog === 'sheet'" @customize="customizeExport" />
+    <UpdateDialog v-if="state.update.open" />
     <Toasts />
   </div>
 </template>

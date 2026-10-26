@@ -37,3 +37,13 @@ The UI bundles Inter, Source Serif 4 and JetBrains Mono (`@fontsource`) so it lo
 ## D9 · Images in exports (2026-10-26)
 
 Local images are read from the note's folder (no `..` escapes). Web images are downloaded at export time in Rust, in parallel, within the import limits (D6) and 40 MB in total; offline they are skipped and the alt text remains. The Read view and the server's `/api/render` keep web image links for the viewer to load.
+
+## D10 · Required updates (2026-10-26)
+
+User asked for forced upgrades. Every release carries `policy.json` (`version`, `minimum`, `notes`) and `policy.json.sig`, signed with the same minisign key as the Tauri updater packages; the public key is in `tauri.conf.json`. The desktop app checks 3 s after start and every 6 hours (official GitHub link, then a gh-proxy mirror; the signature makes the mirror safe).
+
+- Only a verified policy can lock the editor; a failed check never does. The highest verified minimum is cached, so offline starts and stale mirrors cannot lower it.
+- `current < minimum` → a dialog that cannot be closed (no close button, Escape or backdrop), shortcuts and file drops are ignored. It saves the note first (asking where if it is new), then downloads, verifies, installs and restarts. "Open download page" is always there for installs the updater cannot replace.
+- `current < version` → a toast with "View", and a dialog that can be closed.
+- The minimum comes from `apps/desktop/src-tauri/update-policy.json`, or from the Release workflow's `force` input, which sets it to the new version.
+- Phones have no in-app updater; they show the download page. Versions released before D10 have no checker and need one manual install.

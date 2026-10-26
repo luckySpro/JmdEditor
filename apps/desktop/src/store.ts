@@ -6,7 +6,7 @@ import { computed, reactive, watch } from 'vue'
 import { errorText, setLanguage, t } from './i18n'
 import { baseName, joinPath } from './lib/paths'
 import { platform } from './platform'
-import type { AppInfo } from './platform/types'
+import type { AppInfo, UpdateProgress, UpdateStatus } from './platform/types'
 import type { FormatCommand } from './lib/format'
 import {
   DEFAULT_SETTINGS,
@@ -69,6 +69,15 @@ export const state = reactive({
   sidebarOpen: true,
   toasts: [] as Toast[],
   editor: null as EditorHandle | null,
+  update: {
+    status: null as UpdateStatus | null,
+    checking: false,
+    /** The update dialog is showing. A required update keeps it open. */
+    open: false,
+    installing: false,
+    progress: null as UpdateProgress | null,
+    error: '',
+  },
   systemDark: window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false,
 })
 
@@ -76,6 +85,9 @@ export const dirty = computed(() => state.doc.content !== state.doc.savedContent
 export const isDark = computed(() =>
   state.settings.theme === 'system' ? state.systemDark : state.settings.theme === 'dark',
 )
+/** A verified policy says this version may no longer be used. */
+export const updateRequired = computed(() => state.update.status?.state === 'required')
+export const RELEASES_URL = 'https://github.com/luckySpro/JmdEditor/releases/latest'
 export const docName = computed(() => state.doc.name || t('app.untitled'))
 
 let toastId = 0
@@ -340,6 +352,66 @@ export function rememberExport(path: string) {
   state.recentExports.splice(5)
 }
 
+// ---- updates ----------------------------------------------------------------
+
+const UPDATE_INTERVAL_MS = 6 * 60 * 60 * 1000
+let offeredVersion = ''
+
+/** Checks the signed release policy. Quiet unless something is new or `manual`. */
+export async function checkForUpdates(manual = false) {
+  if (state.update.checking) return
+  state.update.checking = true
+  try {
+    const status = await platform.checkUpdate()
+    if (!status) return
+    state.update.status = status
+    if (status.state === 'required') {
+      state.update.open = true
+    } else if (status.state === 'optional') {
+      if (manual) state.update.open = true
+      else if (offeredVersion !== status.version) {
+        offeredVersion = status.version
+        toast(t('update.available', { version: status.version }), 'info', {
+          label: t('update.view'),
+          run: () => (state.update.open = true),
+        })
+      }
+    } else if (manual && status.state === 'up_to_date') {
+      toast(t('update.upToDate', { version: status.current }), 'success')
+    } else if (manual && status.state === 'unknown') {
+      toast(t('update.unknown', { reason: status.reason }), 'error')
+    }
+  } catch (e) {
+    if (manual) reportError(e)
+    else console.warn(e)
+  } finally {
+    state.update.checking = false
+  }
+}
+
+/** Saves the open note (asking where if it is new), then installs and restarts. */
+export async function installUpdate() {
+  if (state.update.installing) return
+  state.update.error = ''
+  if (dirty.value && !(await save())) {
+    state.update.error = t('update.saveFirst')
+    return
+  }
+  state.update.installing = true
+  state.update.progress = null
+  try {
+    await platform.installUpdate((p) => (state.update.progress = { ...state.update.progress, ...p }))
+  } catch (e) {
+    state.update.error = t('update.failed', { message: errorText(e) })
+  } finally {
+    state.update.installing = false
+  }
+}
+
+export function closeUpdate() {
+  if (!updateRequired.value && !state.update.installing) state.update.open = false
+}
+
 // ---- start-up ---------------------------------------------------------------
 
 export async function init() {
@@ -378,6 +450,8 @@ export async function init() {
   }
   if (state.settingsProblem) toast(t('settings.problem', { problem: state.settingsProblem }), 'error')
   state.ready = true
+  setTimeout(() => void checkForUpdates(), 3000)
+  setInterval(() => void checkForUpdates(), UPDATE_INTERVAL_MS)
 }
 
 export function setMode(mode: EditorMode) {

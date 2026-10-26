@@ -23,7 +23,13 @@
       "csp": "default-src 'self'; img-src 'self' asset: http://asset.localhost https: data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; script-src 'self' 'wasm-unsafe-eval'; connect-src 'self' ipc: http://ipc.localhost",
       "assetProtocol": {
         "enable": true,
-        "scope": ["$HOME/**", "$DOCUMENT/**", "$DESKTOP/**", "$DOWNLOAD/**", "$APPDATA/**"]
+        "scope": [
+          "$HOME/**",
+          "$DOCUMENT/**",
+          "$DESKTOP/**",
+          "$DOWNLOAD/**",
+          "$APPDATA/**"
+        ]
       }
     }
   },
@@ -47,11 +53,25 @@
     },
     "fileAssociations": [
       {
-        "ext": ["md", "markdown"],
+        "ext": [
+          "md",
+          "markdown"
+        ],
         "name": "Markdown document",
         "role": "Editor",
         "mimeType": "text/markdown"
       }
     ]
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDk2MkVEMzhBOTcxM0ZGMEEKUldRSy94T1hpdE11bHNVUDJxUzBiSHQwTFRkMFI1MGNwcjlMZmdwZWVieXAybTZ0TDVJNmxEVXgK",
+      "endpoints": [
+        "https://github.com/luckySpro/JmdEditor/releases/latest/download/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
+    }
   }
 }

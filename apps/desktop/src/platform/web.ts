@@ -145,6 +145,11 @@ export function createWebPlatform(): Platform {
     },
     imageUrl: (src) => src,
     confirm: async (message) => window.confirm(message),
+    // The browser build is served by jmd-server and is always current.
+    checkUpdate: async () => null,
+    installUpdate: async () => {
+      throw { code: 'update_unsupported', message: '' }
+    },
   }
 }
 

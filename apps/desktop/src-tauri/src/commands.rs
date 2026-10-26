@@ -12,6 +12,7 @@ use tauri::{AppHandle, Manager, State};
 use crate::error::AppError;
 use crate::files::{self, FolderEntry, OpenedFile};
 use crate::settings::{self, LoadedSettings, Settings};
+use crate::update::{self, UpdateStatus};
 
 /// Shared state: the PDF engine is built in the background at start-up
 /// because scanning system fonts takes a moment.
@@ -335,5 +336,89 @@ mod tests {
         assert_eq!(t.len(), 10);
         assert_eq!(&t[4..5], "-");
         assert!(t.as_str() >= "2026-01-01");
+    }
+}
+
+fn updater_pubkey(app: &AppHandle) -> Option<String> {
+    app.config()
+        .plugins
+        .0
+        .get("updater")?
+        .get("pubkey")?
+        .as_str()
+        .map(str::to_string)
+}
+
+/// Checks the signed release policy. Never fails: a check that cannot reach
+/// the server falls back to the last verified policy, or reports `unknown`.
+#[tauri::command]
+pub async fn check_update(app: AppHandle) -> UpdateStatus {
+    let current = app.package_info().version.to_string();
+    let Ok(dir) = config_dir(&app) else {
+        return update::decide(&current, None, Some("no config folder"));
+    };
+    let cached = update::load_cache(&dir);
+    let fresh = match updater_pubkey(&app) {
+        Some(key) => update::fetch_policy(&key, &update::bases()).await,
+        None => Err("this build has no update key".to_string()),
+    };
+    let (fresh, failure) = match fresh {
+        Ok(p) => (Some(p), None),
+        Err(e) => (None, Some(e)),
+    };
+    let known = update::merge(cached.clone(), fresh);
+    if let Some(p) = known.as_ref().filter(|p| Some(*p) != cached.as_ref()) {
+        let _ = update::save_cache(&dir, p);
+    }
+    update::decide(&current, known.as_ref(), failure.as_deref())
+}
+
+/// Downloads, verifies and installs the newest release, then restarts. The UI
+/// saves the open note before calling this.
+#[tauri::command]
+pub async fn install_update(
+    app: AppHandle,
+    on_progress: tauri::ipc::Channel<serde_json::Value>,
+) -> Result<(), AppError> {
+    #[cfg(desktop)]
+    {
+        use tauri_plugin_updater::UpdaterExt;
+        let fail = |e: tauri_plugin_updater::Error| AppError::new("update_install", e.to_string());
+        let endpoints = update::bases()
+            .iter()
+            .filter_map(|b| format!("{b}/latest.json").parse().ok())
+            .collect();
+        let updater = app
+            .updater_builder()
+            .endpoints(endpoints)
+            .map_err(fail)?
+            .build()
+            .map_err(fail)?;
+        let Some(pending) = updater.check().await.map_err(fail)? else {
+            return Err(AppError::new("update_none", "no newer version was found"));
+        };
+        let mut received: u64 = 0;
+        pending
+            .download_and_install(
+                |chunk, total| {
+                    received += chunk as u64;
+                    let _ = on_progress
+                        .send(serde_json::json!({ "received": received, "total": total }));
+                },
+                || {
+                    let _ = on_progress.send(serde_json::json!({ "installing": true }));
+                },
+            )
+            .await
+            .map_err(fail)?;
+        app.restart();
+    }
+    #[cfg(mobile)]
+    {
+        let _ = (app, on_progress);
+        Err(AppError::new(
+            "update_unsupported",
+            "install updates from the app store",
+        ))
     }
 }

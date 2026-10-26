@@ -20,6 +20,19 @@ export interface AppInfo {
   platform: string
 }
 
+/** Result of checking the signed release policy (see src-tauri/src/update.rs). */
+export type UpdateStatus =
+  | { state: 'up_to_date'; current: string }
+  | { state: 'optional'; current: string; version: string; notes: string }
+  | { state: 'required'; current: string; version: string; minimum: string; notes: string }
+  | { state: 'unknown'; current: string; reason: string }
+
+export interface UpdateProgress {
+  received?: number
+  total?: number | null
+  installing?: boolean
+}
+
 export interface SavedFile {
   path: string
   name: string
@@ -82,4 +95,8 @@ export interface Platform {
   /** URL the webview can load for an image link found in a note. */
   imageUrl(src: string, baseDir: string | null): string
   confirm(message: string, title: string): Promise<boolean>
+  /** Null where the host updates itself (the browser build). */
+  checkUpdate(): Promise<UpdateStatus | null>
+  /** Downloads, verifies and installs the newest release, then restarts. */
+  installUpdate(onProgress: (p: UpdateProgress) => void): Promise<void>
 }

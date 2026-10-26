@@ -2,6 +2,10 @@
 
 const MESSAGES = {
   'zh-CN': {
+    updateTitle: '新版本',
+    updateReady: '新版本已准备好，需要重启小程序后继续使用。',
+    updateRestart: '立即重启',
+    updateFailed: '新版本下载失败。请删除小程序后重新搜索打开。',
     aboutLink: '电脑版下载 · 关于 JmdEditor',
     aboutTitle: '关于',
     tagline: '离线 Markdown 编辑器，一键导出 Word 和 PDF',
@@ -36,6 +40,10 @@ const MESSAGES = {
     network: '无法连接导出服务，请检查网络或服务器域名设置。',
   },
   'zh-TW': {
+    updateTitle: '新版本',
+    updateReady: '新版本已準備好，需要重新啟動小程式後繼續使用。',
+    updateRestart: '立即重新啟動',
+    updateFailed: '新版本下載失敗。請刪除小程式後重新搜尋開啟。',
     aboutLink: '電腦版下載 · 關於 JmdEditor',
     aboutTitle: '關於',
     tagline: '離線 Markdown 編輯器，一鍵匯出 Word 和 PDF',
@@ -70,6 +78,10 @@ const MESSAGES = {
     network: '無法連線匯出服務，請檢查網路或伺服器網域設定。',
   },
   ja: {
+    updateTitle: '新しいバージョン',
+    updateReady: '新しいバージョンの準備ができました。続けるにはミニプログラムを再起動してください。',
+    updateRestart: '再起動',
+    updateFailed: '新しいバージョンをダウンロードできませんでした。ミニプログラムを削除して、もう一度検索して開いてください。',
     aboutLink: 'デスクトップ版 · JmdEditor について',
     aboutTitle: 'について',
     tagline: 'オフラインで使える Markdown エディター。Word と PDF に書き出し',
@@ -104,6 +116,10 @@ const MESSAGES = {
     network: '書き出しサービスに接続できません。ネットワークとサーバードメインの設定を確認してください。',
   },
   en: {
+    updateTitle: 'New version',
+    updateReady: 'A new version is ready. Restart the mini-program to keep using it.',
+    updateRestart: 'Restart now',
+    updateFailed: 'The new version could not be downloaded. Remove the mini-program, then search for it and open it again.',
     aboutLink: 'Desktop app · About JmdEditor',
     aboutTitle: 'About',
     tagline: 'An offline Markdown editor that exports Word and PDF',

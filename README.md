@@ -10,6 +10,7 @@ An offline Markdown editor by **M&J Group** for Windows, macOS, Linux, iOS and A
 - **Import from URL**: GitHub, Gitee and GitLab file links, gists, raw `.md` links and web articles become a new note. Images can be saved next to the note, and the source link and date go into the front matter. Links are fetched by the Rust side with private-network, size, time and redirect limits.
 - **Export to Word, PDF and HTML**: four templates (Clean, Academic, Business, GitHub), A4 or Letter, a table of contents, numbered headings, page numbers, an optional cover page, PDF bookmarks, PDF/A, and Chinese and Japanese text. Word files use real Heading styles and an updatable TOC field. Math, tables, code, task lists, footnotes, GitHub alerts and images are supported.
 - **Works offline** on desktop and mobile. Fonts ship with the app.
+- **Updates**: the desktop app checks a signed release policy, offers new versions, and can require an update before it keeps working. It saves your note, installs and restarts.
 - **Four languages**: English, 简体中文, 繁體中文 and 日本語, plus light and dark themes and an accent colour.
 - **Browser build and hosted API**: the same UI runs in a browser against `jmd-server`, which also serves the mini-program.
 - **WeChat mini-program**: open a note from a link or a chat file, read it, export PDF or Word, then open it or send it to a chat. An About page introduces the app and copies desktop download links.
@@ -61,7 +62,7 @@ pnpm tauri android init && pnpm tauri android dev
 pnpm tauri ios init && pnpm tauri ios dev
 ```
 
-Pushing a tag such as `v0.1.0`, or running the Release workflow from the Actions tab with a tag name, runs `.github/workflows/release.yml`, which builds macOS, Windows and Linux installers and publishes the release once all three have built. Code signing and notarisation are not configured yet. After a release, set `DESKTOP_VERSION` in `apps/miniprogram/config.js` so the mini-program's download links match.
+Pushing a tag such as `v0.1.0`, or running the Release workflow from the Actions tab with a tag name, runs `.github/workflows/release.yml`, which builds macOS, Windows and Linux installers and publishes the release once all three have built. The desktop app updates itself from these releases, and a release can require older versions to update; see [docs/RELEASE.md](docs/RELEASE.md) for the signing key and the `force` option. Code signing and notarisation are not configured yet. After a release, set `DESKTOP_VERSION` in `apps/miniprogram/config.js` so the mini-program's download links match.
 
 ## Export API (`jmd-server`)
 
@@ -99,6 +100,7 @@ JmdEditor 是 M&J Group 出品的离线 Markdown 编辑器，支持 Windows、ma
 - 富文本、分栏、源码、阅读四种模式；
 - 从 GitHub、Gitee、GitLab、Gist、原始 .md 链接或网页文章导入笔记，可将图片保存到本地；
 - 导出 Word、PDF、HTML，支持目录、标题编号、页码、封面、书签、PDF/A，以及中文和日文；
+- 自动升级与强制升级：发布时可要求旧版本必须升级，升级前自动保存笔记，安装后自动重启；
 - 界面支持简体中文、繁體中文、English、日本語，浅色和深色主题；
 - 微信小程序：从链接或聊天文件打开笔记，导出 PDF 或 Word 后可直接打开或发送给朋友；“关于”页面介绍应用，并可复制电脑版下载链接。
 

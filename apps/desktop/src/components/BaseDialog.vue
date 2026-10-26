@@ -1,15 +1,20 @@
 <script setup lang="ts">
 // Modal shell: backdrop, Escape to close, focus kept inside while open.
+// `dismissible: false` hides the close button and ignores Escape and the backdrop.
 import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 
 import { t } from '../i18n'
 import Icon from './Icon.vue'
 
-const props = withDefaults(defineProps<{ title: string; icon?: string; width?: string; labelledBy?: string }>(), {
-  icon: '',
-  width: '880px',
-  labelledBy: '',
-})
+const props = withDefaults(
+  defineProps<{ title: string; icon?: string; width?: string; labelledBy?: string; dismissible?: boolean }>(),
+  {
+    icon: '',
+    width: '880px',
+    labelledBy: '',
+    dismissible: true,
+  },
+)
 const emit = defineEmits<{ close: [] }>()
 const panel = ref<HTMLElement>()
 const titleId = `dlg-${Math.random().toString(36).slice(2, 8)}`
@@ -18,7 +23,8 @@ let previous: Element | null = null
 function onKey(e: KeyboardEvent) {
   if (e.key === 'Escape') {
     e.stopPropagation()
-    emit('close')
+    e.preventDefault()
+    if (props.dismissible) emit('close')
   } else if (e.key === 'Tab' && panel.value) {
     const items = [...panel.value.querySelectorAll<HTMLElement>('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')].filter(
       (el) => !el.hasAttribute('disabled') && el.offsetParent !== null,
@@ -46,7 +52,7 @@ onBeforeUnmount(() => (previous as HTMLElement | null)?.focus?.())
 </script>
 
 <template>
-  <div class="backdrop" @mousedown.self="emit('close')">
+  <div class="backdrop" @mousedown.self="props.dismissible && emit('close')">
     <section
       ref="panel"
       class="dialog"
@@ -63,7 +69,7 @@ onBeforeUnmount(() => (previous as HTMLElement | null)?.focus?.())
           <slot name="lead" />
         </div>
         <slot name="head-extra" />
-        <button type="button" class="icon-btn ghost" :aria-label="t('action.close')" @click="emit('close')">
+        <button v-if="props.dismissible" type="button" class="icon-btn ghost" :aria-label="t('action.close')" @click="emit('close')">
           <Icon name="close" :size="18" />
         </button>
       </header>

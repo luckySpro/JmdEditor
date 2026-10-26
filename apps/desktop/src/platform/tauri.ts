@@ -1,10 +1,10 @@
-import { convertFileSrc, invoke } from '@tauri-apps/api/core'
+import { Channel, convertFileSrc, invoke } from '@tauri-apps/api/core'
 import { ask, open, save } from '@tauri-apps/plugin-dialog'
 import { openPath, openUrl, revealItemInDir } from '@tauri-apps/plugin-opener'
 
 import { isRemote, joinPath, resolveRelative } from '../lib/paths'
 import type { Analysis, ExportResult, FolderEntry, ImportResult, LoadedSettings, OpenedFile, Resolved, Settings } from '../types'
-import type { AppInfo, Platform, SavedFile } from './types'
+import type { AppInfo, Platform, SavedFile, UpdateProgress, UpdateStatus } from './types'
 
 const MARKDOWN = [{ name: 'Markdown', extensions: ['md', 'markdown', 'mdown', 'mkd', 'txt'] }]
 const FILTERS = {
@@ -71,5 +71,11 @@ export function createTauriPlatform(): Platform {
       return convertFileSrc(resolveRelative(baseDir, src))
     },
     confirm: (message, title) => ask(message, { title, kind: 'warning' }),
+    checkUpdate: () => invoke<UpdateStatus>('check_update'),
+    async installUpdate(onProgress) {
+      const channel = new Channel<UpdateProgress>()
+      channel.onmessage = onProgress
+      await invoke('install_update', { onProgress: channel })
+    },
   }
 }

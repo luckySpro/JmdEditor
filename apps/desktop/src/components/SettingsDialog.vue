@@ -3,7 +3,7 @@ import { onMounted, ref } from 'vue'
 
 import { LANGUAGES, t } from '../i18n'
 import { platform } from '../platform'
-import { closeDialog, resetSettings, state, updateSettings } from '../store'
+import { checkForUpdates, closeDialog, resetSettings, state, updateSettings } from '../store'
 import type { EditorMode, Settings } from '../types'
 import BaseDialog from './BaseDialog.vue'
 
@@ -121,6 +121,11 @@ async function reset() {
           <strong>JmdEditor</strong> ·
           {{ t('settings.version', { version: state.info?.version ?? '0.1.0', author: state.info?.author ?? 'M&J Group' }) }}
           · <a href="#" @click.prevent="platform.openUrl('https://github.com/luckySpro/JmdEditor')">GitHub</a>
+        </p>
+        <p v-if="platform.kind === 'tauri'">
+          <button type="button" class="btn secondary small" :disabled="state.update.checking" @click="checkForUpdates(true)">
+            {{ state.update.checking ? t('update.checking') : t('update.check') }}
+          </button>
         </p>
         <p class="hint">{{ t('settings.storedAt', { path: state.settingsPath }) }}</p>
         <button type="button" class="btn danger small" @click="reset">{{ t('settings.reset') }}</button>

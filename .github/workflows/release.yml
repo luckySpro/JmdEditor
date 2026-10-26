@@ -2,17 +2,28 @@ name: Release
 
 # Push a tag such as v0.1.0 to build installers for macOS, Windows and Linux.
 # They are attached to a draft GitHub release, which is published once every
-# platform has built, so the download links in the mini-program never point at
-# a half-filled release.
+# platform has built, so download and update links never point at a
+# half-filled release.
+#
+# With the TAURI_SIGNING_PRIVATE_KEY secret set (see docs/RELEASE.md), the
+# release also carries signed updater packages, latest.json, and policy.json:
+# the signed policy that tells older apps whether they must update.
 on:
   push:
     tags: ["v*"]
-  # Or run it by hand with a version: the tag is created on the chosen branch.
+  # Or run it by hand: the tag is created on the chosen branch.
   workflow_dispatch:
     inputs:
       tag:
         description: Release tag, such as v0.1.0
         required: true
+      force:
+        description: Require every older version to update to this one
+        type: boolean
+        default: false
+      notes:
+        description: What's new (shown in the update dialog)
+        required: false
 
 env:
   TAG: ${{ inputs.tag || github.ref_name }}
@@ -33,6 +44,8 @@ jobs:
           - platform: ubuntu-22.04
             args: ""
     runs-on: ${{ matrix.platform }}
+    env:
+      HAS_UPDATER_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY != '' }}
     steps:
       - uses: actions/checkout@v4
       - name: System libraries for Tauri
@@ -53,23 +66,49 @@ jobs:
       - name: Bundle CJK fonts for PDF export
         shell: bash
         run: scripts/fetch-fonts.sh
+      - name: Updater key missing
+        if: env.HAS_UPDATER_KEY != 'true'
+        shell: bash
+        run: echo "::warning::TAURI_SIGNING_PRIVATE_KEY is not set, so this release has no in-app updates"
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           projectPath: apps/desktop
           tagName: ${{ env.TAG }}
           releaseName: JmdEditor ${{ env.TAG }}
           commitish: ${{ github.sha }}
           releaseDraft: true
-          args: ${{ matrix.args }}
+          updaterJsonPreferNsis: true
+          args: ${{ matrix.args }} ${{ env.HAS_UPDATER_KEY == 'true' && '--config src-tauri/tauri.updater.conf.json' || '' }}
 
   publish:
     needs: desktop
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+      TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+      TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+      FORCE: ${{ inputs.force }}
+      NOTES: ${{ inputs.notes }}
     steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Sign and attach the update policy
+        if: env.TAURI_SIGNING_PRIVATE_KEY != ''
+        run: |
+          version="${TAG#v}"
+          minimum=$(jq -r .minimum apps/desktop/src-tauri/update-policy.json)
+          if [ "$FORCE" = "true" ]; then minimum="$version"; fi
+          jq -n --arg v "$version" --arg m "$minimum" --arg n "$NOTES" --arg d "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            '{version: $v, minimum: $m, notes: $n, pub_date: $d}' > policy.json
+          cat policy.json
+          npx --yes @tauri-apps/cli@2 signer sign policy.json
+          gh release upload "$TAG" policy.json policy.json.sig --clobber
       - name: Publish the release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_REPO: ${{ github.repository }}
         run: gh release edit "$TAG" --draft=false --latest

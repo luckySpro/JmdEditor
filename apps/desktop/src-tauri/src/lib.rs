@@ -4,6 +4,7 @@ mod commands;
 mod error;
 mod files;
 mod settings;
+mod update;
 
 use tauri::Manager;
 
@@ -23,6 +24,9 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .manage(AppState::default())
         .setup(move |app| {
+            #[cfg(desktop)]
+            app.handle()
+                .plugin(tauri_plugin_updater::Builder::new().build())?;
             let state = app.state::<AppState>();
             let _ = state.font_dirs.set(commands::pdf_font_dirs(app.handle()));
             let _ = state.initial_file.set(initial.clone());
@@ -50,6 +54,8 @@ pub fn run() {
             commands::reset_settings,
             commands::default_export_dir,
             commands::font_families,
+            commands::check_update,
+            commands::install_update,
         ])
         .run(tauri::generate_context!())
         .expect("error while running JmdEditor");
