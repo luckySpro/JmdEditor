@@ -110,5 +110,7 @@ jobs:
           cat policy.json
           npx --yes @tauri-apps/cli@2 signer sign policy.json
           gh release upload "$TAG" policy.json policy.json.sig --clobber
+      # --target: a draft left by an earlier, cancelled run may still point
+      # at an older commit; the tag must point at the commit that was built.
       - name: Publish the release
-        run: gh release edit "$TAG" --draft=false --latest
+        run: gh release edit "$TAG" --target "$GITHUB_SHA" --draft=false --latest
