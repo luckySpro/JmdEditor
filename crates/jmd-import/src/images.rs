@@ -98,6 +98,55 @@ pub async fn localize_images(
     (out, report)
 }
 
+/// Total bytes `prefetch_images` keeps in memory for one export.
+pub const MAX_PREFETCH_BYTES: usize = 40 * 1024 * 1024;
+
+/// Downloads the remote images of a note for an export, keyed by the exact link
+/// in the Markdown. Downloads run in parallel and stop at `limits.timeout`
+/// overall; images that fail are left out and the export shows the alt text,
+/// as it would offline.
+pub async fn prefetch_images(
+    markdown: &str,
+    limits: &FetchLimits,
+) -> std::collections::HashMap<String, Vec<u8>> {
+    let mut out = std::collections::HashMap::new();
+    let mut urls: Vec<String> = jmd_core::parse(markdown)
+        .image_urls()
+        .into_iter()
+        .filter(|u| u.starts_with("http://") || u.starts_with("https://"))
+        .collect();
+    urls.sort();
+    urls.dedup();
+    if urls.is_empty() {
+        return out;
+    }
+    let Ok(client) = crate::fetch::client(limits) else {
+        return out;
+    };
+    let mut set = tokio::task::JoinSet::new();
+    for raw in urls.into_iter().take(MAX_IMAGES) {
+        let Ok(url) = Url::parse(&raw) else { continue };
+        let (client, limits) = (client.clone(), limits.clone());
+        set.spawn(async move { (raw, fetch(&client, &url, &limits).await) });
+    }
+    let deadline = tokio::time::Instant::now() + limits.timeout;
+    let mut total = 0;
+    while let Ok(Some(joined)) = tokio::time::timeout_at(deadline, set.join_next()).await {
+        let Ok((raw, Ok(fetched))) = joined else {
+            continue;
+        };
+        if fetched.content_type.starts_with("text/")
+            || total + fetched.body.len() > MAX_PREFETCH_BYTES
+        {
+            continue;
+        }
+        total += fetched.body.len();
+        out.insert(raw, fetched.body);
+    }
+    set.abort_all();
+    out
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -288,7 +288,7 @@ export async function applyImport(
   updateSettings({ recentUrls: remember(state.settings.recentUrls, result.resolved.sourceUrl) })
   if (where === 'cursor' && state.editor) {
     state.editor.insertMarkdown(result.markdown)
-    toast(t('import.done', { title: result.title }), 'success')
+    toast(t('import.done', { title: result.title || result.suggestedName }), 'success')
     return
   }
   if (!(await confirmDiscard())) return
@@ -320,7 +320,7 @@ export async function applyImport(
   }
   state.imported.unshift({ name: state.doc.name, path: state.doc.path, url: result.resolved.sourceUrl })
   state.imported.splice(6)
-  toast(t('import.done', { title: result.title }), 'success')
+  toast(t('import.done', { title: result.title || state.doc.name }), 'success')
 }
 
 // ---- export -----------------------------------------------------------------

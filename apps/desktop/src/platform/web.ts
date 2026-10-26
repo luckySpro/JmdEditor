@@ -21,14 +21,15 @@ async function api<T>(path: string, body: unknown, as: 'json' | 'text' | 'blob' 
     throw { code: 'offline', message: `The export service could not be reached (${String(e)}).` } satisfies AppError
   }
   if (!res.ok) {
-    if ([502, 503, 504].includes(res.status)) throw { code: 'offline', message: res.statusText } satisfies AppError
-    let err: AppError = { code: 'server', message: `${res.status} ${res.statusText}` }
+    let err: AppError | null = null
     try {
       err = await res.json()
     } catch {
-      /* keep the status text */
+      /* not one of our errors: a proxy or gateway answered */
     }
-    throw err
+    if (err?.code) throw err
+    if ([502, 503, 504].includes(res.status)) throw { code: 'offline', message: res.statusText } satisfies AppError
+    throw { code: 'server', message: `${res.status} ${res.statusText}` } satisfies AppError
   }
   return (as === 'json' ? res.json() : as === 'text' ? res.text() : res.blob()) as Promise<T>
 }

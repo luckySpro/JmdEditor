@@ -97,15 +97,27 @@ pub fn load(config_dir: &Path) -> LoadedSettings {
     let path = settings_path(config_dir);
     let display = path.to_string_lossy().into_owned();
     match std::fs::read_to_string(&path) {
-        Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
-            LoadedSettings { settings: Settings::default(), problem: None, path: display }
-        }
-        Err(e) => LoadedSettings { settings: Settings::default(), problem: Some(e.to_string()), path: display },
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => LoadedSettings {
+            settings: Settings::default(),
+            problem: None,
+            path: display,
+        },
+        Err(e) => LoadedSettings {
+            settings: Settings::default(),
+            problem: Some(e.to_string()),
+            path: display,
+        },
         Ok(text) => match serde_json::from_str::<Settings>(&text) {
-            Ok(s) => LoadedSettings { settings: s.normalized(), problem: None, path: display },
+            Ok(s) => LoadedSettings {
+                settings: s.normalized(),
+                problem: None,
+                path: display,
+            },
             Err(e) => LoadedSettings {
                 settings: Settings::default(),
-                problem: Some(format!("settings.json could not be read ({e}); defaults are in use")),
+                problem: Some(format!(
+                    "settings.json could not be read ({e}); defaults are in use"
+                )),
                 path: display,
             },
         },
@@ -130,9 +142,19 @@ mod tests {
     fn round_trips_and_keeps_a_backup() {
         let dir = tempfile::tempdir().unwrap();
         assert_eq!(load(dir.path()).settings, Settings::default());
-        let s = Settings { language: "zh-CN".into(), ..Default::default() };
+        let s = Settings {
+            language: "zh-CN".into(),
+            ..Default::default()
+        };
         save(dir.path(), s.clone()).unwrap();
-        save(dir.path(), Settings { theme: "dark".into(), ..s }).unwrap();
+        save(
+            dir.path(),
+            Settings {
+                theme: "dark".into(),
+                ..s
+            },
+        )
+        .unwrap();
         let loaded = load(dir.path());
         assert_eq!(loaded.settings.language, "zh-CN");
         assert_eq!(loaded.settings.theme, "dark");

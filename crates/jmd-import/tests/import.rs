@@ -108,3 +108,20 @@ async fn refuses_private_addresses_by_default() {
         .unwrap_err();
     assert!(matches!(err, ImportError::Forbidden(_)), "{err:?}");
 }
+
+#[tokio::test]
+async fn prefetches_remote_images_for_export() {
+    let base = serve().await;
+    let md = format!("![a]({base}/notes/img/chart.png) ![b]({base}/missing.png) ![c](local.png)");
+    let limits = FetchLimits {
+        allow_private: true,
+        ..Default::default()
+    };
+    let got = jmd_import::prefetch_images(&md, &limits).await;
+    assert_eq!(got.len(), 1);
+    assert_eq!(got[&format!("{base}/notes/img/chart.png")], PNG);
+    // Private addresses stay blocked with default limits.
+    assert!(jmd_import::prefetch_images(&md, &FetchLimits::default())
+        .await
+        .is_empty());
+}

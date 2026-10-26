@@ -35,7 +35,9 @@ pub fn absolute(path: &str) -> Result<PathBuf, AppError> {
 }
 
 fn display_name(p: &Path) -> String {
-    p.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default()
+    p.file_name()
+        .map(|n| n.to_string_lossy().into_owned())
+        .unwrap_or_default()
 }
 
 pub fn read_note(path: &Path) -> Result<OpenedFile, AppError> {
@@ -52,11 +54,17 @@ pub fn read_note(path: &Path) -> Result<OpenedFile, AppError> {
         Err(e) => String::from_utf8_lossy(e.as_bytes()).into_owned(),
     };
     // A UTF-8 byte order mark is dropped; saving writes plain UTF-8.
-    let content = content.strip_prefix('\u{feff}').map(str::to_string).unwrap_or(content);
+    let content = content
+        .strip_prefix('\u{feff}')
+        .map(str::to_string)
+        .unwrap_or(content);
     Ok(OpenedFile {
         path: path.to_string_lossy().into_owned(),
         name: display_name(path),
-        dir: path.parent().map(|d| d.to_string_lossy().into_owned()).unwrap_or_default(),
+        dir: path
+            .parent()
+            .map(|d| d.to_string_lossy().into_owned())
+            .unwrap_or_default(),
         content,
     })
 }
@@ -64,9 +72,15 @@ pub fn read_note(path: &Path) -> Result<OpenedFile, AppError> {
 /// Writes through a temporary file in the same folder and renames it over the
 /// target, so a crash never leaves a half-written note.
 pub fn write_atomic(path: &Path, bytes: &[u8]) -> Result<(), AppError> {
-    let dir = path.parent().ok_or_else(|| AppError::invalid("the path has no folder"))?;
+    let dir = path
+        .parent()
+        .ok_or_else(|| AppError::invalid("the path has no folder"))?;
     std::fs::create_dir_all(dir)?;
-    let tmp = dir.join(format!(".{}.jmd-tmp-{}", display_name(path), std::process::id()));
+    let tmp = dir.join(format!(
+        ".{}.jmd-tmp-{}",
+        display_name(path),
+        std::process::id()
+    ));
     let result = (|| {
         std::fs::write(&tmp, bytes)?;
         std::fs::rename(&tmp, path)
@@ -79,7 +93,10 @@ pub fn write_atomic(path: &Path, bytes: &[u8]) -> Result<(), AppError> {
 
 fn is_note(p: &Path) -> bool {
     matches!(
-        p.extension().and_then(|e| e.to_str()).map(|e| e.to_ascii_lowercase()).as_deref(),
+        p.extension()
+            .and_then(|e| e.to_str())
+            .map(|e| e.to_ascii_lowercase())
+            .as_deref(),
         Some("md" | "markdown" | "mdown" | "mkd" | "txt")
     )
 }
@@ -95,10 +112,18 @@ pub fn list_notes(dir: &Path) -> Result<Vec<FolderEntry>, AppError> {
                 return None;
             }
             let is_dir = e.file_type().ok()?.is_dir();
-            (is_dir || is_note(&path)).then(|| FolderEntry { path: path.to_string_lossy().into_owned(), name, is_dir })
+            (is_dir || is_note(&path)).then(|| FolderEntry {
+                path: path.to_string_lossy().into_owned(),
+                name,
+                is_dir,
+            })
         })
         .collect();
-    out.sort_by(|a, b| b.is_dir.cmp(&a.is_dir).then_with(|| a.name.to_lowercase().cmp(&b.name.to_lowercase())));
+    out.sort_by(|a, b| {
+        b.is_dir
+            .cmp(&a.is_dir)
+            .then_with(|| a.name.to_lowercase().cmp(&b.name.to_lowercase()))
+    });
     out.truncate(2000);
     Ok(out)
 }
@@ -110,10 +135,20 @@ pub const MAX_ASSET_BYTES: usize = 20 * 1024 * 1024;
 pub fn safe_file_name(name: &str) -> String {
     let cleaned: String = name
         .chars()
-        .map(|c| if c.is_alphanumeric() || matches!(c, '-' | '_' | '.') { c } else { '-' })
+        .map(|c| {
+            if c.is_alphanumeric() || matches!(c, '-' | '_' | '.') {
+                c
+            } else {
+                '-'
+            }
+        })
         .collect();
     let cleaned = cleaned.trim_matches(|c| c == '.' || c == '-').to_string();
-    if cleaned.is_empty() { "image.png".to_string() } else { cleaned }
+    if cleaned.is_empty() {
+        "image.png".to_string()
+    } else {
+        cleaned
+    }
 }
 
 /// Saves an image under `<note_dir>/assets/` and returns the link to use in the note.
@@ -169,7 +204,11 @@ mod tests {
         std::fs::write(dir.path().join(".hidden.md"), "").unwrap();
         std::fs::create_dir(dir.path().join("sub")).unwrap();
         std::fs::create_dir(dir.path().join("assets")).unwrap();
-        let names: Vec<_> = list_notes(dir.path()).unwrap().into_iter().map(|e| e.name).collect();
+        let names: Vec<_> = list_notes(dir.path())
+            .unwrap()
+            .into_iter()
+            .map(|e| e.name)
+            .collect();
         assert_eq!(names, ["sub", "A.markdown", "b.md"]);
     }
 
@@ -184,8 +223,14 @@ mod tests {
     #[test]
     fn saves_assets_with_safe_unique_names() {
         let dir = tempfile::tempdir().unwrap();
-        assert_eq!(save_asset(dir.path(), "../evil name.png", b"x").unwrap(), "assets/evil-name.png");
-        assert_eq!(save_asset(dir.path(), "../evil name.png", b"y").unwrap(), "assets/evil-name-2.png");
+        assert_eq!(
+            save_asset(dir.path(), "../evil name.png", b"x").unwrap(),
+            "assets/evil-name.png"
+        );
+        assert_eq!(
+            save_asset(dir.path(), "../evil name.png", b"y").unwrap(),
+            "assets/evil-name-2.png"
+        );
         assert!(dir.path().join("assets/evil-name.png").is_file());
         assert_eq!(safe_file_name("屏幕截图 1.png"), "屏幕截图-1.png");
     }

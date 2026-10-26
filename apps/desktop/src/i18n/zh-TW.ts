@@ -202,6 +202,7 @@ export const zhTW: Messages = {
   'error.too_large': '檔案超過 10 MB。',
   'error.unsupported': '無法匯入此類內容：{message}',
   'error.needsSave': '請先儲存筆記，圖片會存放在筆記旁邊。',
+  'error.busy': '匯出服務忙碌中，請稍後再試。',
   'error.offline': '無法連線到 JmdEditor 伺服器。',
 
   'welcome.name': '歡迎.md',

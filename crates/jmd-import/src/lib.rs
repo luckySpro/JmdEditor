@@ -14,7 +14,7 @@ use std::path::PathBuf;
 use serde::{Deserialize, Serialize};
 
 pub use fetch::FetchLimits;
-pub use images::ImageReport;
+pub use images::{prefetch_images, ImageReport};
 pub use resolve::{resolve, Resolved, SourceKind};
 
 #[derive(Debug, thiserror::Error)]

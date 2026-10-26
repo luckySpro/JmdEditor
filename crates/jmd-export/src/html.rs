@@ -143,12 +143,18 @@ pub fn render(doc: &Document, opts: &ExportOptions, images: &ImageSource) -> Str
         }
         body.push_str("</header>\n");
     }
+    // Without a cover, a leading title heading stays above the contents.
+    let title_first =
+        !opts.cover && matches!(doc.blocks.first(), Some(Block::Heading { level: 1, .. }));
+    if title_first {
+        ctx.block(&doc.blocks[0], &mut body);
+    }
     if opts.toc {
         body.push_str(&toc_html(&entries, opts));
     }
     let skip_title = opts.cover;
     for (i, block) in doc.blocks.iter().enumerate() {
-        if skip_title && i == first_h1_index(doc) {
+        if (skip_title && i == first_h1_index(doc)) || (title_first && i == 0) {
             continue;
         }
         ctx.block(block, &mut body);

@@ -24,13 +24,16 @@ pub struct AppState {
 
 impl AppState {
     pub fn engine(&self) -> &PdfEngine {
-        self.engine
-            .get_or_init(|| PdfEngine::new(self.font_dirs.get().map(Vec::as_slice).unwrap_or_default()))
+        self.engine.get_or_init(|| {
+            PdfEngine::new(self.font_dirs.get().map(Vec::as_slice).unwrap_or_default())
+        })
     }
 }
 
 fn config_dir(app: &AppHandle) -> Result<PathBuf, AppError> {
-    app.path().app_config_dir().map_err(|e| AppError::new("settings", e.to_string()))
+    app.path()
+        .app_config_dir()
+        .map_err(|e| AppError::new("settings", e.to_string()))
 }
 
 fn today() -> String {
@@ -92,8 +95,14 @@ pub async fn save_file(path: String, content: String) -> Result<Saved, AppError>
         files::write_atomic(&p, content.as_bytes())?;
         Ok(Saved {
             path: p.to_string_lossy().into_owned(),
-            name: p.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default(),
-            dir: p.parent().map(|d| d.to_string_lossy().into_owned()).unwrap_or_default(),
+            name: p
+                .file_name()
+                .map(|n| n.to_string_lossy().into_owned())
+                .unwrap_or_default(),
+            dir: p
+                .parent()
+                .map(|d| d.to_string_lossy().into_owned())
+                .unwrap_or_default(),
         })
     })
     .await
@@ -110,7 +119,11 @@ pub async fn list_folder(path: String) -> Result<Vec<FolderEntry>, AppError> {
 
 /// Stores a pasted or dropped image next to the note; returns the relative link.
 #[tauri::command]
-pub async fn save_asset(note_dir: String, file_name: String, data: Vec<u8>) -> Result<String, AppError> {
+pub async fn save_asset(
+    note_dir: String,
+    file_name: String,
+    data: Vec<u8>,
+) -> Result<String, AppError> {
     let dir = files::absolute(&note_dir)?;
     tauri::async_runtime::spawn_blocking(move || files::save_asset(&dir, &file_name, &data))
         .await
@@ -129,7 +142,11 @@ pub struct Analysis {
 pub fn analyze(markdown: String) -> Analysis {
     let doc = jmd_core::parse(&markdown);
     let (_, body) = jmd_core::split_front_matter(&markdown);
-    Analysis { title: doc.title(), outline: jmd_core::outline(&doc), stats: jmd_core::stats(body) }
+    Analysis {
+        title: doc.title(),
+        outline: jmd_core::outline(&doc),
+        stats: jmd_core::stats(body),
+    }
 }
 
 #[tauri::command]
@@ -166,14 +183,22 @@ pub async fn import_url(request: ImportRequest) -> Result<ImportResult, AppError
     let folder = request.folder.as_deref().map(files::absolute).transpose()?;
     let stem_hint = jmd_import::suggested_file_name("", &resolved);
     let stem = stem_hint.trim_end_matches(".md").to_string();
-    let mut opts = ImportOptions { record_source: request.record_source, today: today(), ..Default::default() };
+    let mut opts = ImportOptions {
+        record_source: request.record_source,
+        today: today(),
+        ..Default::default()
+    };
     if let (true, Some(dir)) = (request.save_images, &folder) {
         opts.image_dir = Some(dir.join("assets").join(&stem));
         opts.image_rel_dir = format!("assets/{stem}");
     }
     let note = jmd_import::import_url(&request.url, &opts).await?;
     let suggested_name = jmd_import::suggested_file_name(&note.title, &note.resolved);
-    let suggested_path = folder.map(|d| files::unique_path(&d, &suggested_name).to_string_lossy().into_owned());
+    let suggested_path = folder.map(|d| {
+        files::unique_path(&d, &suggested_name)
+            .to_string_lossy()
+            .into_owned()
+    });
     Ok(ImportResult {
         title: note.title,
         markdown: note.markdown,
@@ -204,16 +229,33 @@ pub struct ExportResult {
 }
 
 #[tauri::command]
-pub async fn export_document(request: ExportRequest, state: State<'_, AppState>) -> Result<ExportResult, AppError> {
+pub async fn export_document(
+    request: ExportRequest,
+    state: State<'_, AppState>,
+) -> Result<ExportResult, AppError> {
     let out = files::absolute(&request.out_path)?;
-    let base_dir = request.base_dir.as_deref().map(files::absolute).transpose()?;
+    let base_dir = request
+        .base_dir
+        .as_deref()
+        .map(files::absolute)
+        .transpose()?;
     let engine_cell = state.engine.clone();
     let font_dirs = state.font_dirs.get().cloned().unwrap_or_default();
+    // Web images are fetched now so the file contains them; offline they are skipped.
+    let provided = jmd_import::prefetch_images(
+        &request.markdown,
+        &jmd_import::FetchLimits {
+            timeout: std::time::Duration::from_secs(10),
+            ..Default::default()
+        },
+    )
+    .await;
     tauri::async_runtime::spawn_blocking(move || {
         let started = std::time::Instant::now();
         let engine = engine_cell.get_or_init(|| PdfEngine::new(&font_dirs));
-        let images = ImageSource { base_dir, ..Default::default() };
-        let bytes = jmd_export::export_markdown(&request.markdown, &request.options, &images, engine)?;
+        let images = ImageSource { base_dir, provided };
+        let bytes =
+            jmd_export::export_markdown(&request.markdown, &request.options, &images, engine)?;
         files::write_atomic(&out, &bytes)?;
         Ok(ExportResult {
             path: out.to_string_lossy().into_owned(),
@@ -227,9 +269,16 @@ pub async fn export_document(request: ExportRequest, state: State<'_, AppState>)
 
 /// HTML of the note for the Read view and printing, using the export renderer.
 #[tauri::command]
-pub fn render_html(markdown: String, base_dir: Option<String>, options: ExportOptions) -> Result<String, AppError> {
+pub fn render_html(
+    markdown: String,
+    base_dir: Option<String>,
+    options: ExportOptions,
+) -> Result<String, AppError> {
     let base_dir = base_dir.as_deref().map(files::absolute).transpose()?;
-    let images = ImageSource { base_dir, ..Default::default() };
+    let images = ImageSource {
+        base_dir,
+        ..Default::default()
+    };
     let doc = jmd_core::parse(&markdown);
     Ok(jmd_export::html::render(&doc, &options, &images))
 }
@@ -257,7 +306,11 @@ pub fn default_export_dir(app: AppHandle) -> Result<String, AppError> {
         .document_dir()
         .or_else(|_| app.path().home_dir())
         .map_err(|e| AppError::new("io", e.to_string()))?;
-    Ok(base.join("JmdEditor").join("exports").to_string_lossy().into_owned())
+    Ok(base
+        .join("JmdEditor")
+        .join("exports")
+        .to_string_lossy()
+        .into_owned())
 }
 
 #[tauri::command]

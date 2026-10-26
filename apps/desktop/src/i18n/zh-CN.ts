@@ -202,6 +202,7 @@ export const zhCN: Messages = {
   'error.too_large': '文件超过 10 MB。',
   'error.unsupported': '无法导入此类内容：{message}',
   'error.needsSave': '请先保存笔记，图片会存放在笔记旁边。',
+  'error.busy': '导出服务繁忙，请稍后再试。',
   'error.offline': '无法连接 JmdEditor 服务器。',
 
   'welcome.name': '欢迎.md',

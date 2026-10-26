@@ -200,6 +200,7 @@ export const en = {
   'error.too_large': 'The file is larger than 10 MB.',
   'error.unsupported': 'This kind of content cannot be imported: {message}',
   'error.needsSave': 'Save the note first so the image can be stored next to it.',
+  'error.busy': 'The export service is busy. Try again in a minute.',
   'error.offline': 'The JmdEditor server could not be reached.',
 
   'welcome.name': 'Welcome.md',

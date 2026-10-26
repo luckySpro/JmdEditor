@@ -202,6 +202,7 @@ export const ja: Messages = {
   'error.too_large': 'ファイルが 10 MB を超えています。',
   'error.unsupported': 'この種類の内容は取り込めません：{message}',
   'error.needsSave': '画像をノートの隣に保存するため、先にノートを保存してください。',
+  'error.busy': '書き出しサービスが混み合っています。しばらくしてからお試しください。',
   'error.offline': 'JmdEditor サーバーに接続できませんでした。',
 
   'welcome.name': 'ようこそ.md',

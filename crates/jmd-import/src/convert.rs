@@ -105,7 +105,93 @@ pub fn absolutize_links(md: &str, base: &Url) -> String {
             out = out.replace(&format!("]({target}"), &format!("]({abs}"));
         }
     }
+    // Raw HTML such as `<img src="docs/logo.png">` in README files.
+    let mut raw: Vec<String> = Vec::new();
+    collect_html(&doc.blocks, &mut raw);
+    visit_inlines(&doc.blocks, &mut |i| {
+        if let Inline::Html { html } = i {
+            raw.push(html.clone());
+        }
+    });
+    raw.sort();
+    raw.dedup();
+    for html in raw {
+        let fixed = absolutize_html_attrs(&html, base);
+        if fixed != html {
+            out = out.replace(&html, &fixed);
+        }
+    }
     out
+}
+
+fn collect_html(blocks: &[jmd_core::Block], out: &mut Vec<String>) {
+    use jmd_core::Block;
+    for b in blocks {
+        match b {
+            Block::Html { html } => out.push(html.trim_end().to_string()),
+            Block::Quote { blocks }
+            | Block::Alert { blocks, .. }
+            | Block::FootnoteDefinition { blocks, .. } => collect_html(blocks, out),
+            Block::List { items, .. } => items.iter().for_each(|i| collect_html(&i.blocks, out)),
+            _ => {}
+        }
+    }
+}
+
+/// Makes `src="…"` and `href="…"` values absolute against `base`.
+pub fn absolutize_html_attrs(html: &str, base: &Url) -> String {
+    let mut out = String::with_capacity(html.len());
+    let mut rest = html;
+    while let Some(pos) = find_attr(rest) {
+        let (head, tail) = rest.split_at(pos.value_start);
+        out.push_str(head);
+        let end = tail.find(pos.quote).unwrap_or(tail.len());
+        let value = &tail[..end];
+        let keep = value.is_empty()
+            || value.starts_with('#')
+            || Url::parse(value).is_ok()
+            || value.starts_with("//");
+        match (keep, base.join(value)) {
+            (false, Ok(abs)) => out.push_str(abs.as_str()),
+            _ => out.push_str(value),
+        }
+        rest = &tail[end..];
+    }
+    out.push_str(rest);
+    out
+}
+
+struct AttrPos {
+    value_start: usize,
+    quote: char,
+}
+
+fn find_attr(s: &str) -> Option<AttrPos> {
+    let lower = s.to_ascii_lowercase();
+    let mut best: Option<AttrPos> = None;
+    for name in ["src=", "href="] {
+        let mut from = 0;
+        while let Some(i) = lower[from..].find(name) {
+            let at = from + i;
+            from = at + name.len();
+            let before_ok = at == 0 || lower.as_bytes()[at - 1].is_ascii_whitespace();
+            let quote = s[from..].chars().next();
+            if before_ok && matches!(quote, Some('"') | Some('\'')) {
+                let cand = AttrPos {
+                    value_start: from + 1,
+                    quote: quote.unwrap(),
+                };
+                if best
+                    .as_ref()
+                    .is_none_or(|b| cand.value_start < b.value_start)
+                {
+                    best = Some(cand);
+                }
+                break;
+            }
+        }
+    }
+    best
 }
 
 /// Strips HTML tags that must never reach the editor from raw Markdown (scripts, frames, handlers).
@@ -132,6 +218,26 @@ pub fn strip_dangerous_html(md: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn absolutizes_raw_html_attributes() {
+        let base = Url::parse("https://raw.example.com/o/r/main/README.md").unwrap();
+        let md = "<img src=\".github/splash.png\" alt=\"x\" />\n\nText <a href='docs/a.md'>a</a> and <img src=\"https://x.test/a.png\">\n\n```html\n<img src=\"keep.png\">\n```\n";
+        let out = absolutize_links(md, &base);
+        assert!(
+            out.contains("src=\"https://raw.example.com/o/r/main/.github/splash.png\""),
+            "{out}"
+        );
+        assert!(
+            out.contains("href='https://raw.example.com/o/r/main/docs/a.md'"),
+            "{out}"
+        );
+        assert!(out.contains("src=\"https://x.test/a.png\""));
+        assert!(
+            out.contains("<img src=\"keep.png\">"),
+            "code is left alone: {out}"
+        );
+    }
 
     #[test]
     fn converts_article_html() {
