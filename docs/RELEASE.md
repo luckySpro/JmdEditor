@@ -14,7 +14,7 @@ Without the secret, releases still build, with a warning, but they have no updat
 
 1. Set the same version in `apps/desktop/src-tauri/tauri.conf.json`, `apps/desktop/package.json` and `Cargo.toml` (`workspace.package.version`), then merge.
 2. Actions → Release → Run workflow, with `tag` (for example `v0.2.0`), optional `notes`, and `force` when every older version must update. Pushing a `v*` tag works too (no notes, no force).
-3. The workflow builds macOS, Windows and Linux, uploads the installers, updater packages and `latest.json`, signs `policy.json`, and publishes the release only when all three succeed.
+3. The workflow builds macOS, Windows and Linux, uploads the installers, updater packages and `latest.json`, packs `jmd-server-linux-x64.tar.gz` (the mini-program's server, see `deploy/linux/宝塔部署说明.md`), signs `policy.json`, and publishes the release only when all three succeed.
 4. Set `DESKTOP_VERSION` in `apps/miniprogram/config.js` to the new version and upload the mini-program.
 
 ## Required updates

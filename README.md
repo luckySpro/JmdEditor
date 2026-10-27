@@ -74,6 +74,8 @@ JMD_STATIC=apps/desktop/dist cargo run -p jmd-server  # http://127.0.0.1:8787
 
 Or with Docker: `docker build -f crates/jmd-server/Dockerfile -t jmd-server . && docker run -p 8787:8787 jmd-server`.
 
+Each release also carries `jmd-server-linux-x64.tar.gz`: a static Linux binary with a start script, config template, fonts and the browser build, for BaoTa (宝塔), Supervisor or systemd. See [deploy/linux/宝塔部署说明.md](deploy/linux/宝塔部署说明.md).
+
 | Variable | Default | Meaning |
 | --- | --- | --- |
 | `JMD_ADDR` | `127.0.0.1:8787` | Listen address |

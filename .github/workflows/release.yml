@@ -86,8 +86,36 @@ jobs:
           updaterJsonPreferNsis: true
           args: ${{ matrix.args }} ${{ env.HAS_UPDATER_KEY == 'true' && '--config src-tauri/tauri.updater.conf.json' || '' }}
 
-  publish:
+  # The export API for the mini-program and browser build, as a static Linux
+  # binary with its start script, config, fonts and web app, ready for
+  # BaoTa (宝塔) or systemd. See deploy/linux/宝塔部署说明.md.
+  server:
     needs: desktop
+    runs-on: ubuntu-22.04
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y musl-tools
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-unknown-linux-musl
+      - uses: Swatinem/rust-cache@v2
+      - run: pnpm install --frozen-lockfile && pnpm build
+      - run: cargo build --release --locked -p jmd-server --target x86_64-unknown-linux-musl
+      - name: Pack and attach
+        run: |
+          scripts/package-server.sh target/x86_64-unknown-linux-musl/release/jmd-server jmd-server-linux-x64.tar.gz
+          gh release upload "$TAG" jmd-server-linux-x64.tar.gz --clobber
+
+  publish:
+    needs: [desktop, server]
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
