@@ -55,6 +55,9 @@ importers:
       '@tauri-apps/plugin-opener':
         specifier: ^2.7.2
         version: 2.7.2
+      dompurify:
+        specifier: 3.2.6
+        version: 3.2.6
       vue:
         specifier: ^3.5.44
         version: 3.5.44(typescript@5.9.3)
@@ -77,6 +80,8 @@ importers:
       vue-tsc:
         specifier: ^3.3.13
         version: 3.3.13(typescript@5.9.3)
+
+  apps/miniprogram: {}
 
 packages:
 
@@ -687,8 +692,8 @@ packages:
   devlop@1.1.0:
     resolution: {integrity: sha512-RWmIqhcFf1lRYBvNmr7qTNuyCt/7/ns2jbpp1+PalgE/rDQcBT0fioSMUpJ93irlUhC5hrg4cYqe6U+0ImW0rA==}
 
-  dompurify@3.4.17:
-    resolution: {integrity: sha512-B/pSlYVHQ58kqISD/yDjuJ1yfzI34m1gF4lAod2bwSRhiN4K5Cl3H8Af7hqB2PmTL911tdEudnnXn5FnhRoz0w==}
+  dompurify@3.2.6:
+    resolution: {integrity: sha512-/2GogDQlohXPZe6D6NOgQvXLPSYBqIWMnZ8zzOhn09REE4eyAzb+Hed3jhoM9OkuaJ8P6ZGTTVWQKAi8ieIzfQ==}
 
   entities@7.0.1:
     resolution: {integrity: sha512-TWrgLOFUQTH994YUyl1yT4uyavY5nNB5muff+RtWaqNVCAK408b5ZnnbNAUEWLTCpum9w6arT70i1XdQ4UeOPA==}
@@ -1657,7 +1662,7 @@ snapshots:
       '@milkdown/utils': 7.22.3
       '@types/lodash-es': 4.17.12
       clsx: 2.1.1
-      dompurify: 3.4.17
+      dompurify: 3.2.6
       lodash-es: 4.18.1
       nanoid: 6.0.2
       unist-util-visit: 5.2.0
@@ -1690,7 +1695,7 @@ snapshots:
       '@types/lodash-es': 4.17.12
       clsx: 2.1.1
       codemirror: 6.0.2
-      dompurify: 3.4.17
+      dompurify: 3.2.6
       katex: 0.19.1
       lodash-es: 4.18.1
       prosemirror-virtual-cursor: 0.4.2(prosemirror-model@1.25.12)(prosemirror-state@1.4.4)(prosemirror-view@1.42.8)
@@ -2207,7 +2212,7 @@ snapshots:
     dependencies:
       dequal: 2.0.3
 
-  dompurify@3.4.17:
+  dompurify@3.2.6:
     optionalDependencies:
       '@types/trusted-types': 2.0.7
 

@@ -7,6 +7,7 @@ import '@milkdown/crepe/theme/classic.css'
 import { editorViewCtx, remarkStringifyOptionsCtx } from '@milkdown/kit/core'
 import {
   createCodeBlockCommand,
+  htmlSchema,
   insertHrCommand,
   toggleEmphasisCommand,
   toggleInlineCodeCommand,
@@ -18,12 +19,13 @@ import {
   wrapInOrderedListCommand,
 } from '@milkdown/kit/preset/commonmark'
 import { insertTableCommand, toggleStrikethroughCommand } from '@milkdown/kit/preset/gfm'
-import { callCommand, insert, replaceAll } from '@milkdown/kit/utils'
+import { $remark, $view, callCommand, insert, replaceAll } from '@milkdown/kit/utils'
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 import { t } from '../i18n'
 import { snippet, type FormatCommand } from '../lib/format'
 import { joinFrontMatter, splitFrontMatter } from '../lib/frontmatter'
+import { remarkMergeHtml, rendersEmpty, sanitizeHtml } from '../lib/html'
 import { fromRichImages, toRichImages } from '../lib/imageblocks'
 import { platform } from '../platform'
 import { reportError, state, type EditorHandle } from '../store'
@@ -99,6 +101,29 @@ async function upload(file: File) {
   }
 }
 
+const mergeHtml = $remark('jmdMergeHtml', () => remarkMergeHtml)
+
+/** Raw HTML shows as sanitised, rendered HTML; the Markdown keeps the original tags. */
+const htmlView = $view(htmlSchema.node, () => (node) => {
+  const dom = document.createElement('span')
+  dom.className = 'md-html'
+  dom.contentEditable = 'false'
+  const html = sanitizeHtml(node.attrs.value as string, (src) => platform.imageUrl(src, props.baseDir))
+  dom.innerHTML = html
+  if (rendersEmpty(html)) {
+    dom.classList.add('empty')
+    dom.title = node.attrs.value as string
+  }
+  // Links inside the HTML open in the browser rather than inside the app.
+  dom.addEventListener('click', (e) => {
+    const href = (e.target as Element | null)?.closest?.('a')?.getAttribute('href')
+    if (!href) return
+    e.preventDefault()
+    if (/^(https?:|mailto:)/i.test(href)) void platform.openUrl(href)
+  })
+  return { dom, ignoreMutation: () => true }
+})
+
 async function create() {
   const split = splitFrontMatter(props.modelValue)
   frontMatter = split.frontMatter
@@ -116,6 +141,7 @@ async function create() {
       [Crepe.Feature.LinkTooltip]: {},
     },
   })
+  crepe.editor.use(mergeHtml).use(htmlView)
   // Keep the note's own list style instead of remark's `*` bullets.
   crepe.editor.config((ctx) => {
     ctx.update(remarkStringifyOptionsCtx, (prev) => ({ ...prev, bullet: '-' as const, rule: '-' as const }))
@@ -209,6 +235,26 @@ defineExpose({ handle })
 .rich-editor :deep(.milkdown h2) {
   padding-bottom: 6px;
   border-bottom: 1px solid var(--border);
+}
+.rich-editor :deep(.md-html img) {
+  display: inline;
+  max-width: 100%;
+  margin: 0;
+  vertical-align: middle;
+}
+.rich-editor :deep(.md-html.empty) {
+  display: none;
+}
+.rich-editor:not(.readonly) :deep(.md-html.empty) {
+  display: inline-block;
+  padding: 0 4px;
+  border-radius: 4px;
+  font: 12px/1.6 var(--font-mono);
+  color: var(--text-3);
+  background: var(--surface-2);
+}
+.rich-editor:not(.readonly) :deep(.md-html.empty)::before {
+  content: '</>';
 }
 .rich-editor :deep(.milkdown blockquote) {
   background: var(--quote-bg);
