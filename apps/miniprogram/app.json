@@ -1,0 +1,12 @@
+{
+  "pages": ["pages/index/index", "pages/about/about"],
+  "window": {
+    "navigationBarTitleText": "Jmd Reader",
+    "navigationBarBackgroundColor": "#FFFFFF",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#F4F5F7"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

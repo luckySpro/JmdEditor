@@ -1,0 +1,37 @@
+[package]
+name = "jmdeditor"
+description = "JmdEditor — offline Markdown editor with URL import and Word/PDF export"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[lib]
+name = "jmdeditor_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+jmd-core.workspace = true
+jmd-import.workspace = true
+jmd-export.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tokio = { workspace = true, features = ["fs"] }
+tauri = { version = "2", features = ["protocol-asset"] }
+tauri-plugin-dialog = "2"
+tauri-plugin-opener = "2"
+base64 = "0.22"
+minisign-verify = "0.2"
+semver = "1"
+reqwest = { version = "0.13", default-features = false, features = ["rustls"] }
+
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+tauri-plugin-updater = "2"
+tauri-plugin-single-instance = "2"
+
+[dev-dependencies]
+tempfile = "3"

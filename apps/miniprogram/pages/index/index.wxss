@@ -1,0 +1,147 @@
+.page {
+  padding: 24rpx 24rpx calc(48rpx + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+.card {
+  background: #ffffff;
+  border-radius: 20rpx;
+  padding: 28rpx;
+  box-shadow: 0 2rpx 6rpx rgba(16, 24, 40, 0.06);
+}
+.open {
+  display: flex;
+  flex-direction: column;
+  gap: 18rpx;
+}
+.label {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #5b6270;
+}
+.row {
+  display: flex;
+  gap: 16rpx;
+  align-items: center;
+}
+.url {
+  flex: 1;
+  height: 76rpx;
+  padding: 0 20rpx;
+  border: 2rpx solid #d5dae1;
+  border-radius: 14rpx;
+  font-size: 26rpx;
+  font-family: Menlo, monospace;
+}
+.btn {
+  margin: 0;
+  height: 80rpx;
+  line-height: 80rpx;
+  border-radius: 14rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  padding: 0 28rpx;
+}
+.btn.small {
+  height: 76rpx;
+  line-height: 76rpx;
+  width: auto;
+}
+.btn.grow {
+  flex: 1;
+  width: auto;
+}
+.btn.primary {
+  background: #2f5bd3;
+  color: #ffffff;
+}
+.btn.outline {
+  background: #ffffff;
+  color: #1b1e24;
+  border: 2rpx solid #d5dae1;
+}
+.btn.ghost {
+  background: #f0f2f5;
+  color: #1f44a8;
+  font-weight: 500;
+}
+.article {
+  padding: 36rpx 32rpx;
+}
+.empty {
+  padding: 80rpx 40rpx;
+  text-align: center;
+  color: #9aa1ad;
+  font-size: 26rpx;
+  line-height: 1.6;
+}
+.export {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+.settings {
+  display: flex;
+  flex-direction: column;
+}
+.setting {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 80rpx;
+  border-bottom: 2rpx solid #eef0f3;
+  font-size: 28rpx;
+}
+.muted {
+  color: #5b6270;
+  font-size: 24rpx;
+}
+.result {
+  display: flex;
+  gap: 20rpx;
+  align-items: center;
+  padding: 20rpx;
+  background: #f4f7fe;
+  border-radius: 14rpx;
+}
+.badge {
+  width: 76rpx;
+  height: 92rpx;
+  border-radius: 10rpx;
+  color: #ffffff;
+  font-size: 20rpx;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.badge.pdf {
+  background: #c2410c;
+}
+.badge.docx {
+  background: #1d4ed8;
+}
+.result-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+  min-width: 0;
+}
+.result-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  word-break: break-all;
+}
+.about-link {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8rpx;
+  padding: 16rpx 0;
+  font-size: 26rpx;
+  color: #2f5bd3;
+}
+.chevron {
+  font-size: 32rpx;
+}

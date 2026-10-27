@@ -1,0 +1,15 @@
+# Optional systemd unit for servers without BaoTa (宝塔).
+#   cp jmd-server.service /etc/systemd/system/ && systemctl enable --now jmd-server
+[Unit]
+Description=JmdEditor export API
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/www/wwwroot/jmd-server/start.sh
+Restart=on-failure
+User=www
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

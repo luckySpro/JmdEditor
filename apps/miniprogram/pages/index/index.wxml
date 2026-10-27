@@ -1,0 +1,48 @@
+<view class="page">
+  <view class="card open">
+    <text class="label">{{t.openLabel}}</text>
+    <view class="row">
+      <input class="url" type="text" value="{{url}}" placeholder="{{t.placeholder}}" confirm-type="go" bindinput="onUrlInput" bindconfirm="openUrl" />
+      <button class="btn primary small" bindtap="openUrl" loading="{{loading}}" disabled="{{loading}}">{{t.open}}</button>
+    </view>
+    <button class="btn ghost" bindtap="chooseFromChat">{{t.chooseChat}}</button>
+  </view>
+
+  <view wx:if="{{html}}" class="card article">
+    <rich-text nodes="{{html}}" user-select="{{true}}"></rich-text>
+  </view>
+  <view wx:else class="empty">
+    <text>{{loading ? t.loading : t.empty}}</text>
+  </view>
+
+  <view wx:if="{{markdown}}" class="card export">
+    <view class="settings">
+      <picker range="{{t.templates}}" value="{{templateIndex}}" bindchange="onTemplate">
+        <view class="setting"><text class="muted">{{t.template}}</text><text>{{t.templates[templateIndex]}}</text></view>
+      </picker>
+      <picker range="{{paperLabels}}" value="{{paperIndex}}" bindchange="onPaper">
+        <view class="setting"><text class="muted">{{t.paper}}</text><text>{{paperLabels[paperIndex]}}</text></view>
+      </picker>
+      <view class="setting"><text class="muted">{{t.toc}}</text><switch checked="{{toc}}" color="#2F5BD3" bindchange="onToc" /></view>
+    </view>
+    <view class="row">
+      <button class="btn primary grow" bindtap="exportPdf" loading="{{exporting === 'pdf'}}" disabled="{{!!exporting}}">{{exporting === 'pdf' ? t.exporting : t.exportPdf}}</button>
+      <button class="btn outline grow" bindtap="exportWord" loading="{{exporting === 'docx'}}" disabled="{{!!exporting}}">{{exporting === 'docx' ? t.exporting : t.exportWord}}</button>
+    </view>
+    <view wx:if="{{result}}" class="result">
+      <view class="badge {{result.fileType}}">{{result.kind}}</view>
+      <view class="result-text">
+        <text class="result-name">{{result.label}}</text>
+        <text class="muted">{{result.size}}</text>
+      </view>
+    </view>
+    <view wx:if="{{result}}" class="row">
+      <button class="btn outline grow" bindtap="openResult">{{t.openFile}}</button>
+      <button class="btn primary grow" bindtap="sendResult">{{t.sendToChat}}</button>
+    </view>
+  </view>
+
+  <view class="about-link" bindtap="goAbout">
+    <text>{{t.aboutLink}}</text><text class="chevron">›</text>
+  </view>
+</view>
