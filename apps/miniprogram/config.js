@@ -8,5 +8,5 @@ module.exports = {
   // outside links, so the page copies them for the user to paste in a browser.
   // Keep DESKTOP_VERSION in step with the latest published GitHub release.
   RELEASES_URL: 'https://github.com/luckySpro/JmdEditor/releases',
-  DESKTOP_VERSION: '0.1.0',
+  DESKTOP_VERSION: '0.2.0',
 }

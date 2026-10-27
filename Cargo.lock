@@ -2927,7 +2927,7 @@ dependencies = [
 
 [[package]]
 name = "jmd-core"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "comrak",
  "serde",
@@ -2935,7 +2935,7 @@ dependencies = [
 
 [[package]]
 name = "jmd-export"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "base64 0.22.1",
  "docx-rs",
@@ -2952,7 +2952,7 @@ dependencies = [
 
 [[package]]
 name = "jmd-import"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "dom_smoothie",
  "encoding_rs",
@@ -2969,7 +2969,7 @@ dependencies = [
 
 [[package]]
 name = "jmd-server"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "axum",
  "http-body-util",
@@ -2987,7 +2987,7 @@ dependencies = [
 
 [[package]]
 name = "jmdeditor"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "base64 0.22.1",
  "jmd-core",
